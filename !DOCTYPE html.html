@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Plumbline – South Conference Room Schedule</title>
+  <meta http-equiv="refresh" content="1800"> <!-- full page refresh every 30 min as a backup -->
+
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+      font-family: system-ui, sans-serif;
+      background: #f4f6f8;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      background: #004578; /* Plumbline blue */
+      color: white;
+      padding: 8px 12px;
+      font-size: 22px;
+      font-weight: 600;
+      height: 56px;
+    }
+    header img {
+      height: 36px;
+      margin-right: 12px;
+    }
+    iframe {
+      border: none;
+      width: 100%;
+      height: calc(100vh - 56px);
+      transform: scale(0.9);           /* slightly zoomed out to fit */
+      transform-origin: top center;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <img src="https://wg.scene7.com/is/image/wrenchgroup/updated-2023-logo-pl23wi001wg?fmt=png-alpha" alt="Plumbline Logo" />
+    Plumbline – Conference Room Schedule
+  </header>
+
+  <!-- Replace this link with your published HTML calendar link -->
+  <iframe src="https://outlook.office365.com/owa/calendar/73ff77286546455d984e75751c99096d@plumblineservices.com/11007c9e19554a799267ce38e79446506920446490200924026/calendar.html"></iframe>
+
+  <!-- Auto-refresh the embedded Outlook calendar every 5 minutes -->
+  <script>
+    setInterval(() => {
+      const iframe = document.querySelector("iframe");
+      iframe.src = iframe.src;  // reloads the Outlook calendar silently
+    }, 300000); // 300,000 ms = 5 minutes
+  </script>
+</body>
+</html>
