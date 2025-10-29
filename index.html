@@ -5,165 +5,41 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Centennial – South Conference Room</title>
 <style>
-  /* --- GLOBAL --- */
   html,body{
-    margin:0;
-    padding:0;
+    margin:0;padding:0;
     font-family:"Segoe UI",sans-serif;
-    color:#fff;
-    overflow:hidden;
+    color:#fff;overflow:hidden;
     background:#000;
   }
-  .background{
-    position:fixed;
-    inset:0;
-    background-size:cover;
-    background-position:center;
-    transition:opacity 2s ease-in-out;
-  }
+  .background{position:fixed;inset:0;background-size:cover;background-position:center;transition:opacity 2s ease-in-out;}
   .fade{opacity:0;}
-
   header{
-    position:absolute;
-    top:10px;
-    left:30px;
-    right:30px;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
+    position:absolute;top:10px;left:30px;right:30px;
+    display:flex;justify-content:space-between;align-items:center;
     z-index:3;
   }
-  header h1{
-    font-size:1.6rem;
-    font-weight:600;
-    color:#00539f;
-    text-shadow:0 0 8px rgba(0,0,0,.4);
-  }
-  #logo{
-    width:160px;
-    opacity:.95;
-  }
-
-  main{
-    position:relative;
-    display:flex;
-    height:100vh;
-    z-index:2;
-    background:rgba(0,0,0,.35);
-    backdrop-filter:blur(6px);
-  }
-
-  /* --- LEFT PANEL --- */
-  .left{
-    flex:0 0 32%;
-    padding:90px 30px 30px;
-    display:flex;
-    flex-direction:column;
-    justify-content:flex-start;
-    align-items:flex-start;
-  }
-  .clock{
-    font-size:4rem;
-    font-weight:600;
-    line-height:1;
-  }
-  .date{
-    font-size:1.2rem;
-    margin-bottom:20px;
-    color:#f7b500;
-  }
-  #status{
-    font-size:1.1rem;
-    font-weight:500;
-    margin:10px 0 25px;
-  }
-  #status.available{color:#00c853;}
-  #status.busy{color:#e53935;}
-  .weather{
-    margin-top:auto;
-    font-size:1rem;
-  }
-  .temp{
-    font-size:2rem;
-    font-weight:600;
-  }
-  .forecast{
-    display:flex;
-    gap:12px;
-    margin-top:12px;
-    font-size:.85rem;
-  }
+  header h1{font-size:1.6rem;font-weight:600;color:#00539f;text-shadow:0 0 8px rgba(0,0,0,.4);}
+  #logo{max-width:170px;height:auto;opacity:.95;flex-shrink:0;}
+  main{position:relative;display:flex;height:100vh;z-index:2;background:rgba(0,0,0,.35);backdrop-filter:blur(6px);}
+  .left{flex:0 0 32%;padding:90px 30px 30px;display:flex;flex-direction:column;align-items:flex-start;}
+  .clock{font-size:4rem;font-weight:600;line-height:1;}
+  .date{font-size:1.2rem;margin-bottom:20px;color:#f7b500;}
+  #status{font-size:1.1rem;font-weight:500;margin:10px 0 25px;}
+  #status.available{color:#00c853;}#status.busy{color:#e53935;}
+  .weather{margin-top:auto;font-size:1rem;}
+  .temp{font-size:2rem;font-weight:600;}
+  .forecast{display:flex;gap:12px;margin-top:12px;font-size:.85rem;}
   .forecast div{text-align:center;}
-
-  /* --- RIGHT PANEL --- */
-  .right{
-    flex:1;
-    padding:90px 30px 30px;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-  }
-  .calendar{
-    width:90%;
-    max-width:900px;
-    background:rgba(0,0,0,.45);
-    border-radius:12px;
-    padding:20px;
-    backdrop-filter:blur(5px);
-  }
-  .cal-header{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-bottom:10px;
-    color:#f7b500;
-    font-weight:600;
-  }
-  .grid{
-    display:grid;
-    grid-template-columns:repeat(7,1fr);
-    grid-auto-rows:110px;
-    gap:2px;
-  }
-  .day{
-    position:relative;
-    background:rgba(255,255,255,.05);
-    border-radius:6px;
-    padding:6px;
-    overflow:hidden;
-  }
-  .day .date-num{
-    font-size:.9rem;
-    opacity:.9;
-  }
-  .today{
-    outline:2px solid #f7b500;
-  }
-  .event{
-    position:absolute;
-    left:4px;
-    right:4px;
-    height:12px;
-    border-radius:3px;
-    background:#00539f;
-    opacity:.85;
-    margin-top:4px;
-  }
-  .event:hover::after{
-    content:attr(data-title);
-    position:absolute;
-    bottom:16px;
-    left:0;
-    right:0;
-    background:rgba(0,0,0,.8);
-    color:#fff;
-    padding:4px 6px;
-    border-radius:4px;
-    font-size:.75rem;
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-  }
+  .right{flex:1;padding:90px 30px 30px;display:flex;justify-content:center;align-items:center;}
+  .calendar{width:90%;max-width:900px;background:rgba(0,0,0,.45);border-radius:12px;padding:20px;backdrop-filter:blur(5px);}
+  .cal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;color:#f7b500;font-weight:600;}
+  .grid{display:grid;grid-template-columns:repeat(7,1fr);grid-auto-rows:110px;gap:2px;}
+  .day{position:relative;background:rgba(255,255,255,.05);border-radius:6px;padding:6px;overflow:hidden;}
+  .day .date-num{font-size:.9rem;opacity:.9;}
+  .today{outline:2px solid #f7b500;}
+  .event{position:absolute;left:4px;right:4px;height:12px;border-radius:3px;background:#00539f;opacity:.85;margin-top:4px;}
+  .event:hover::after{content:attr(data-title);position:absolute;bottom:16px;left:0;right:0;background:rgba(0,0,0,.8);color:#fff;padding:4px 6px;border-radius:4px;font-size:.75rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  #noEvents{text-align:center;color:#ccc;margin-top:20px;}
 </style>
 </head>
 <body>
@@ -181,7 +57,7 @@
     <div class="date" id="date">Loading...</div>
     <div id="status">Loading schedule...</div>
     <div class="weather" id="weather">
-      <div class="temp" id="temp">--°</div>
+      <div class="temp" id="temp">--°F</div>
       <div id="conditions"></div>
       <div class="forecast" id="forecast"></div>
     </div>
@@ -191,12 +67,12 @@
     <div class="calendar">
       <div class="cal-header" id="calHeader"></div>
       <div class="grid" id="calendarGrid"></div>
+      <div id="noEvents"></div>
     </div>
   </section>
 </main>
 
 <script>
-/* ---------- CONFIG ---------- */
 const IMAGES=[
  "images/calphoto1.jpg","images/calphoto2.jpg","images/calphoto3.jpg",
  "images/calphoto4.jpg","images/calphoto5.jpg"
@@ -208,15 +84,14 @@ const LAT=39.5807, LON=-104.8772;
 
 /* ---------- BACKGROUND FADE ---------- */
 let currentBg=0;
-const bg1=document.getElementById("bg1"), bg2=document.getElementById("bg2");
+const bg1=document.getElementById("bg1"),bg2=document.getElementById("bg2");
 bg1.style.backgroundImage=`url('${IMAGES[0]}')`;
 setInterval(()=>{
  const next=(currentBg+1)%IMAGES.length;
  const front=currentBg%2?bg2:bg1;
  const back=currentBg%2?bg1:bg2;
  back.style.backgroundImage=`url('${IMAGES[next]}')`;
- front.classList.add("fade");
- back.classList.remove("fade");
+ front.classList.add("fade"); back.classList.remove("fade");
  currentBg=next;
 },15000);
 
@@ -224,20 +99,20 @@ setInterval(()=>{
 function updateClock(){
  const now=new Date();
  document.getElementById("clock").textContent=
-   now.toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"});
+   now.toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"});
  document.getElementById("date").textContent=
-   now.toLocaleDateString([], {weekday:"long", month:"long", day:"numeric"});
+   now.toLocaleDateString([], {weekday:"long",month:"long",day:"numeric"});
 }
 setInterval(updateClock,1000); updateClock();
 
 /* ---------- WEATHER ---------- */
 async function loadWeather(){
  try{
-   const url=`https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m,weathercode&daily=temperature_2m_max,temperature_2m_min,weathercode&forecast_days=4&timezone=auto`;
+   const url=`https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&temperature_unit=fahrenheit&current=temperature_2m,weathercode&daily=temperature_2m_max,temperature_2m_min,weathercode&forecast_days=4&timezone=auto`;
    const res=await fetch(url);
    const data=await res.json();
    const codes={0:"☀️",1:"🌤",2:"⛅",3:"☁️",45:"🌫",48:"🌫",51:"🌦",61:"🌧",71:"❄️",80:"🌧",95:"⛈"};
-   document.getElementById("temp").textContent=Math.round(data.current.temperature_2m)+"°";
+   document.getElementById("temp").textContent=Math.round(data.current.temperature_2m)+"°F";
    document.getElementById("conditions").textContent=codes[data.current.weathercode]||"";
    const fc=document.getElementById("forecast"); fc.innerHTML="";
    for(let i=1;i<data.daily.time.length;i++){
@@ -253,15 +128,17 @@ async function loadICS(){
  try{
    const res=await fetch(ICS_URL);
    const text=await res.text();
-   const lines=text.split(/\r?\n/);
+   // unfold wrapped lines
+   const unfolded=text.replace(/\r?\n[ \t]/g,"");
+   const lines=unfolded.split(/\r?\n/);
    const events=[];
    let current={};
    for(const line of lines){
      if(line.startsWith("BEGIN:VEVENT")) current={};
-     if(line.startsWith("SUMMARY:")) current.summary=line.replace("SUMMARY:","").trim();
-     if(line.startsWith("DTSTART")) current.start=parseDate(line);
-     if(line.startsWith("DTEND")) current.end=parseDate(line);
-     if(line.startsWith("END:VEVENT")) events.push(current);
+     else if(line.startsWith("SUMMARY:")) current.summary=line.slice(8).trim();
+     else if(line.startsWith("DTSTART")) current.start=parseDate(line);
+     else if(line.startsWith("DTEND")) current.end=parseDate(line);
+     else if(line.startsWith("END:VEVENT")) events.push(current);
    }
    renderCalendar(events);
    updateStatus(events);
@@ -272,32 +149,33 @@ function parseDate(line){
  return m?new Date(m[1].replace(/(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})/,"$1-$2-$3T$4:$5:$6")):null;
 }
 function renderCalendar(events){
- const now=new Date();
- const year=now.getFullYear(), month=now.getMonth();
+ const now=new Date(),year=now.getFullYear(),month=now.getMonth();
  const firstDay=new Date(year,month,1);
  const startDay=firstDay.getDay();
  const daysInMonth=new Date(year,month+1,0).getDate();
  document.getElementById("calHeader").textContent=
-   now.toLocaleDateString([], {month:"long", year:"numeric"});
+   now.toLocaleDateString([], {month:"long",year:"numeric"});
  const grid=document.getElementById("calendarGrid");
  grid.innerHTML="";
  for(let i=0;i<startDay;i++) grid.innerHTML+="<div></div>";
+ let hasEvents=false;
  for(let d=1;d<=daysInMonth;d++){
-   const cell=document.createElement("div");
-   cell.className="day";
+   const cell=document.createElement("div"); cell.className="day";
    const date=new Date(year,month,d);
    if(date.toDateString()===now.toDateString()) cell.classList.add("today");
    cell.innerHTML=`<div class="date-num">${d}</div>`;
    const dayEvents=events.filter(e=>e.start&&e.start.toDateString()===date.toDateString());
+   if(dayEvents.length>0) hasEvents=true;
    dayEvents.forEach((ev,idx)=>{
      const el=document.createElement("div");
      el.className="event";
      el.style.top=(20+idx*14)+"px";
-     el.dataset.title=`${ev.summary} (${formatTime(ev.start)}–${formatTime(ev.end)})`;
+     el.dataset.title=`${ev.summary||"Untitled"} (${formatTime(ev.start)}–${formatTime(ev.end)})`;
      cell.appendChild(el);
    });
    grid.appendChild(cell);
  }
+ document.getElementById("noEvents").textContent=hasEvents?"":"No scheduled meetings.";
 }
 function updateStatus(events){
  const now=new Date();
@@ -305,7 +183,7 @@ function updateStatus(events){
  const ongoing=todayEvents.find(e=>now>=e.start&&now<e.end);
  const statusEl=document.getElementById("status");
  if(ongoing){
-   statusEl.textContent="🔴 In Use – "+ongoing.summary+" until "+formatTime(ongoing.end);
+   statusEl.textContent="🔴 In Use – "+(ongoing.summary||"Meeting")+" until "+formatTime(ongoing.end);
    statusEl.className="busy";
  }else{
    const next=todayEvents.find(e=>e.start>now);
