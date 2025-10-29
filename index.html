@@ -3,101 +3,88 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>South Conference Room</title>
-
-<meta name="apple-mobile-web-app-capable" content="yes" />
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-
+<title>Centennial – South Conference Room</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body, html {
-    height: 100%;
+  body {
+    margin: 0;
+    font-family: "Segoe UI", sans-serif;
+    color: #ffffff;
     overflow: hidden;
-    font-family: system-ui, -apple-system, sans-serif;
-    color: #fff;
   }
 
-  /* Background slideshow container */
-  .bg {
+  .background {
     position: fixed;
     top: 0; left: 0;
     width: 100%; height: 100%;
     background-size: cover;
     background-position: center;
     transition: opacity 2s ease-in-out;
-    z-index: -2;
   }
 
-  /* Overlay for better text readability */
   .overlay {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: rgba(0, 0, 0, 0.45);
-    z-index: -1;
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    padding-top: 40px;
+    backdrop-filter: blur(6px) brightness(0.9);
+    background: rgba(0, 0, 0, 0.25);
   }
 
-  header {
-    text-align: center;
-    padding: 24px 10px 8px;
+  h1 {
+    color: #00539f; /* Plumbline blue */
     font-size: 2rem;
-    font-weight: 600;
+    margin-bottom: 0.5em;
   }
 
-  .status {
-    text-align: center;
-    margin: 10px 0 20px;
-    font-size: 1.5rem;
-    font-weight: 600;
-  }
-
-  .status.free { color: #4caf50; }
-  .status.busy { color: #ff5252; }
-
-  .event {
-    margin: 12px auto;
-    max-width: 600px;
-    background: rgba(255, 255, 255, 0.12);
-    border-radius: 10px;
-    padding: 12px 16px;
-    backdrop-filter: blur(6px);
-  }
-
-  .event .time {
-    font-weight: bold;
+  #status {
     font-size: 1.2rem;
+    font-weight: bold;
+    color: #f7b500; /* Gold accent */
   }
 
-  .event .title {
-    margin-top: 4px;
-    font-size: 1.1rem;
+  #status.available { color: #00c853; }
+  #status.busy { color: #e53935; }
+
+  #events {
+    margin-top: 1em;
+    padding: 1em;
+    text-align: left;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+    background: rgba(0, 0, 0, 0.35);
+    border-radius: 10px;
   }
 
-  footer {
-    position: fixed;
-    bottom: 10px;
-    width: 100%;
-    text-align: center;
-    font-size: 0.8rem;
-    color: #ccc;
+  #logo {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    width: 170px;
+    opacity: 0.95;
+  }
+
+  .fade {
+    opacity: 0;
   }
 </style>
 </head>
-
 <body>
-<div id="bg1" class="bg"></div>
-<div id="bg2" class="bg" style="opacity: 0;"></div>
-<div class="overlay"></div>
+  <div id="bg1" class="background"></div>
+  <div id="bg2" class="background fade"></div>
 
-<header>South Conference Room</header>
-<div id="status" class="status">Loading schedule...</div>
-<div id="events"></div>
-
-<footer>Auto-refreshes every 5 minutes</footer>
+  <div class="overlay">
+    <img id="logo" src="https://wg.scene7.com/is/image/wrenchgroup/updated-2023-logo-pl23wi001wg?fmt=png-alpha" alt="Plumbline Logo" />
+    <h1>Centennial – South Conference Room</h1>
+    <div id="status">Loading schedule...</div>
+    <div id="events"></div>
+  </div>
 
 <script>
 const ICS_URL = "https://api.allorigins.win/raw?url=" + encodeURIComponent(
-  "https://outlook.office365.com/owa/calendar/73ff77286546455d984e75751c99096d@plumblineservices.com/11007c9e19554a799267ce38e79446506920446490200924026/calendar.ics");
+  "https://outlook.office365.com/owa/calendar/73ff77286546455d984e75751c99096d@plumblineservices.com/11007c9e19554a799267ce38e79446506920446490200924026/calendar.ics"
+);
+
 const images = [
   "images/calphoto1.jpg",
   "images/calphoto2.jpg",
@@ -106,108 +93,79 @@ const images = [
   "images/calphoto5.jpg"
 ];
 
-// ---------- Background fade rotation ----------
-let current = 0;
+let currentBg = 0;
 const bg1 = document.getElementById("bg1");
 const bg2 = document.getElementById("bg2");
-bg1.style.backgroundImage = `url(${images[0]})`;
 
-setInterval(() => {
-  const next = (current + 1) % images.length;
-  bg2.style.backgroundImage = `url(${images[next]})`;
-  bg2.style.opacity = 1;
-  setTimeout(() => {
-    bg1.style.backgroundImage = bg2.style.backgroundImage;
-    bg2.style.opacity = 0;
-    current = next;
-  }, 2000);
-}, 15000); // 15 seconds per image
+function cycleBackground() {
+  const next = (currentBg + 1) % images.length;
+  const front = currentBg % 2 ? bg2 : bg1;
+  const back = currentBg % 2 ? bg1 : bg2;
+  back.style.backgroundImage = `url('${images[next]}')`;
+  front.classList.add("fade");
+  back.classList.remove("fade");
+  currentBg = next;
+}
+bg1.style.backgroundImage = `url('${images[0]}')`;
+setInterval(cycleBackground, 15000); // 15 sec per image
 
-// ---------- Calendar logic ----------
 async function loadICS() {
   try {
     const res = await fetch(ICS_URL);
     const text = await res.text();
-    parseICS(text);
-  } catch {
-    document.getElementById("status").textContent = "Unable to load calendar.";
-  }
-}
+    const now = new Date();
+    const events = [];
+    const lines = text.split(/\r?\n/);
 
-function parseICS(data) {
-  const events = [];
-  const lines = data.split(/\r?\n/);
-  let current = {};
-  for (const line of lines) {
-    if (line.startsWith("BEGIN:VEVENT")) current = {};
-    else if (line.startsWith("END:VEVENT")) {
-      if (current.start && current.end && current.summary)
-        events.push(current);
-    } else if (line.startsWith("DTSTART")) {
-      current.start = parseICSTime(line.split(":")[1]);
-    } else if (line.startsWith("DTEND")) {
-      current.end = parseICSTime(line.split(":")[1]);
-    } else if (line.startsWith("SUMMARY")) {
-      current.summary = line.split(":")[1];
+    let current = {};
+    for (let line of lines) {
+      if (line.startsWith("BEGIN:VEVENT")) current = {};
+      if (line.startsWith("SUMMARY:")) current.summary = line.replace("SUMMARY:", "").trim();
+      if (line.startsWith("DTSTART")) current.start = parseDate(line);
+      if (line.startsWith("DTEND")) current.end = parseDate(line);
+      if (line.startsWith("END:VEVENT")) events.push(current);
     }
-  }
 
-  events.sort((a,b)=>a.start-b.start);
-  const now = new Date();
-  const today = events.filter(e => e.start.toDateString() === now.toDateString());
-  const container = document.getElementById("events");
-  container.innerHTML = "";
+    const todayEvents = events.filter(e =>
+      e.start && e.start.toDateString() === now.toDateString()
+    ).sort((a,b) => a.start - b.start);
 
-  if (!today.length) {
-    document.getElementById("status").textContent = "🟢 Available all day";
-    document.getElementById("status").className = "status free";
-    return;
-  }
+    const ongoing = todayEvents.find(e => now >= e.start && now < e.end);
+    const statusEl = document.getElementById("status");
+    const eventsEl = document.getElementById("events");
 
-  let isBusy = false;
-  let next = null;
-
-  for (const e of today) {
-    const startStr = e.start.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
-    const endStr = e.end.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
-    const div = document.createElement("div");
-    div.className = "event";
-    div.innerHTML = `<div class="time">${startStr}–${endStr}</div>
-                     <div class="title">${e.summary}</div>`;
-    container.appendChild(div);
-    if (now >= e.start && now <= e.end) isBusy = true;
-    if (now < e.start && !next) next = e;
-  }
-
-  const status = document.getElementById("status");
-  if (isBusy) {
-    status.textContent = "🔴 In Use";
-    status.className = "status busy";
-  } else {
-    if (next) {
-      const startStr = next.start.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
-      status.textContent = `🟢 Available until ${startStr}`;
+    if (ongoing) {
+      statusEl.textContent = "🔴 In Use until " + formatTime(ongoing.end);
+      statusEl.className = "busy";
     } else {
-      status.textContent = "🟢 Available for the rest of the day";
+      statusEl.textContent = todayEvents.length ? "🟢 Available between meetings" : "🟢 Available all day";
+      statusEl.className = "available";
     }
-    status.className = "status free";
+
+    eventsEl.innerHTML = todayEvents.map(e =>
+      `<div><strong>${formatTime(e.start)} – ${formatTime(e.end)}</strong><br>${e.summary || "Untitled meeting"}</div>`
+    ).join("<hr style='border: 0; height: 1px; background: rgba(255,255,255,0.2); margin: 8px 0;'>");
+  } catch (err) {
+    document.getElementById("status").textContent = "Unable to load calendar";
   }
 }
 
-function parseICSTime(val) {
-  const year = parseInt(val.slice(0,4));
-  const month = parseInt(val.slice(4,6)) - 1;
-  const day = parseInt(val.slice(6,8));
-  const hour = parseInt(val.slice(9,11));
-  const minute = parseInt(val.slice(11,13));
-  return new Date(Date.UTC(year, month, day, hour, minute));
+function parseDate(line) {
+  const m = line.match(/:(\d{8}T\d{6})/);
+  return m ? new Date(
+    m[1].replace(
+      /(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})/,
+      "$1-$2-$3T$4:$5:$6"
+    )
+  ) : null;
+}
+
+function formatTime(d) {
+  return d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
 }
 
 loadICS();
-setInterval(loadICS, 120000); // 2 min refresh
+setInterval(loadICS, 300000); // 5 min refresh
 </script>
 </body>
 </html>
-
-
-
