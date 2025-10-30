@@ -58,6 +58,8 @@
     background: rgba(0, 0, 0, 0.3);
     padding: 30px 60px;
     border-radius: 20px;
+    width: 80%;
+    max-width: 700px;
   }
 
   #time {
@@ -86,6 +88,12 @@
     opacity: 0.95;
   }
 
+  #forecast {
+    margin-top: 15px;
+    font-size: 1.1rem;
+    opacity: 0.9;
+  }
+
   footer {
     position: absolute;
     bottom: 15px;
@@ -111,6 +119,7 @@
     <div id="date">Loading...</div>
     <div id="status" class="available">Loading schedule...</div>
     <div id="weather">Loading weather...</div>
+    <div id="forecast"></div>
   </main>
 
   <footer>Auto-refreshes every 2 minutes</footer>
@@ -149,21 +158,31 @@ function updateClock() {
 updateClock();
 setInterval(updateClock, 1000);
 
-/* ---------- WEATHER ---------- */
+/* ---------- WEATHER + FORECAST ---------- */
 async function loadWeather() {
   try {
     const res = await fetch(
-      `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&temperature_unit=fahrenheit&current=temperature_2m,weathercode&timezone=auto`
+      `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&temperature_unit=fahrenheit&current=temperature_2m,weathercode&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=auto`
     );
     const data = await res.json();
     const codes = {
-      0: "☀️ Clear sky", 1: "🌤 Mostly sunny", 2: "⛅ Partly cloudy", 3: "☁️ Cloudy",
-      45: "🌫 Fog", 48: "🌫 Mist", 51: "🌦 Drizzle", 61: "🌧 Rain", 71: "❄️ Snow",
-      80: "🌧 Showers", 95: "⛈ Storm"
+      0: "☀️", 1: "🌤", 2: "⛅", 3: "☁️",
+      45: "🌫", 48: "🌫", 51: "🌦", 61: "🌧",
+      71: "❄️", 80: "🌧", 95: "⛈"
     };
     const temp = Math.round(data.current.temperature_2m);
     const icon = codes[data.current.weathercode] || "🌤";
-    document.getElementById("weather").textContent = `${icon}  ${temp}°F`;
+    document.getElementById("weather").textContent = `${icon}  ${temp}°F in Centennial`;
+
+    // 3-day forecast
+    const forecast = data.daily.time.slice(1, 4).map((date, i) => {
+      const code = data.daily.weathercode[i + 1];
+      const hi = Math.round(data.daily.temperature_2m_max[i + 1]);
+      const lo = Math.round(data.daily.temperature_2m_min[i + 1]);
+      const day = new Date(date).toLocaleDateString([], {weekday: "short"});
+      return `${day}: ${codes[code] || "🌤"} ${hi}° / ${lo}°`;
+    });
+    document.getElementById("forecast").innerHTML = forecast.join("  •  ");
   } catch {
     document.getElementById("weather").textContent = "Weather unavailable";
   }
@@ -214,17 +233,19 @@ function parseICS(text) {
 
 function updateStatus(events) {
   const now = new Date();
-  const today = events.filter(e => e.start && e.start.toDateString() === now.toDateString());
-  const current = today.find(e => now >= e.start && now < e.end);
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+  const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
+  const todayEvents = events.filter(e => e.start && e.start < todayEnd && e.end > todayStart);
+  const current = todayEvents.find(e => now >= e.start && now < e.end);
   const statusEl = document.getElementById("status");
 
   if (current) {
     statusEl.textContent = `🔴 In Use – ${current.summary || "Meeting"} until ${formatTime(current.end)}`;
     statusEl.className = "busy";
   } else {
-    const next = today.find(e => e.start > now);
+    const next = todayEvents.find(e => e.start > now);
     statusEl.textContent = next
-      ? `🟢 Available until ${formatTime(next.start)}`
+      ? `🟢 Available until ${formatTime(next.start)} (${next.summary})`
       : "🟢 Available all day";
     statusEl.className = "available";
   }
