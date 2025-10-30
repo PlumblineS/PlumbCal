@@ -71,9 +71,11 @@
       font-size: 2rem;
       font-weight: 600;
       margin: 20px 0;
+      word-break: break-word;
     }
     .available { color: #00ff88; }
     .busy { color: #ff4c4c; }
+    .error { color: #ffaa00; }
     #status.loading::before {
       content: "⏳ ";
     }
@@ -106,6 +108,11 @@
       padding: 5px;
       border-left: 3px solid #f7b500;
     }
+    #ics-upload {
+      margin-top: 10px;
+      font-size: 1rem;
+      opacity: 0.8;
+    }
     footer {
       position: absolute;
       bottom: 15px;
@@ -135,6 +142,10 @@
       <h3>Today's Schedule</h3>
       <ul id="event-list"></ul>
     </div>
+    <div id="ics-upload">
+      <label for="ics-file">Upload ICS file for testing:</label>
+      <input type="file" id="ics-file" accept=".ics" />
+    </div>
   </main>
   <footer>Auto-refreshes every 2 minutes</footer>
   <script>
@@ -146,12 +157,16 @@
       "images/calphoto4.jpg",
       "images/calphoto5.jpg"
     ];
-    const ICS_URL =
-      "https://api.allorigins.win/raw?url=" +
-      encodeURIComponent(
-        "https://outlook.office365.com/owa/calendar/73ff77286546455d984e75751c99096d@plumblineservices.com/11007c9e19554a799267ce38e79446506920446490200924026/calendar.ics"
-      );
+    const ICS_URLS = [
+      "https://corsproxy.io/?" + encodeURIComponent(
+        "https://outlook.office365.com/owa/calendar/73ff77286546455d984e75751c99096d@plumblineservices.com/62c74f8908f34b578a230a0671a965bb689818300626846041/calendar.ics"
+      ),
+      "https://api.allorigins.win/raw?url=" + encodeURIComponent(
+        "https://outlook.office365.com/owa/calendar/73ff77286546455d984e75751c99096d@plumblineservices.com/62c74f8908f34b578a230a0671a965bb689818300626846041/calendar.ics"
+      )
+    ];
     const LAT = 39.5807, LON = -104.8772;
+    const TEST_EVENTS = true; // Set to false once ICS is confirmed working
 
     /* ---------- BACKGROUND ROTATION ---------- */
     let currentImage = 0;
@@ -212,45 +227,105 @@
 
     /* ---------- CALENDAR STATUS ---------- */
     let lastEvents = [];
-    async function loadICS() {
-      const statusEl = document.getElementById("status");
-      statusEl.classList.add("loading");
+    async function fetchWithRetry(urls, maxRetries = 3, delayMs = 5000) {
+      for (let url of urls) {
+        for (let attempt = 1; attempt <= maxRetries; attempt++) {
+          try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 10000);
+            const res = await fetch(url, { signal: controller.signal });
+            clearTimeout(timeoutId);
+            if (!res.ok) {
+              throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+            }
+            return res;
+          } catch (error) {
+            console.error(`Attempt ${attempt} failed for ${url}:`, error);
+            if (attempt === maxRetries && url === urls[urls.length - 1]) throw error;
+            await new Promise(resolve => setTimeout(resolve, delayMs));
+          }
+        }
+      }
+    }
+
+    async function parseICS(text) {
       try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000);
-        const res = await fetch(ICS_URL, { signal: controller.signal });
-        clearTimeout(timeoutId);
-        if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-        const text = await res.text();
-        if (!text.includes("BEGIN:VCALENDAR")) throw new Error("Invalid ICS data");
+        console.log("Raw ICS response:", text.substring(0, 500) + (text.length > 500 ? "..." : ""));
+        if (!text.trim()) {
+          throw new Error("Empty response (check calendar sharing or propagation)");
+        }
+        if (!text.includes("BEGIN:VCALENDAR")) {
+          throw new Error("Invalid ICS format (no VCALENDAR)");
+        }
         const jcalData = ICAL.parse(text);
         const comp = new ICAL.Component(jcalData);
         const vevents = comp.getAllSubcomponents("vevent");
-        const events = vevents.map(vevent => ({
-          start: vevent.getFirstPropertyValue("dtstart").toJSDate(),
-          end: vevent.getFirstPropertyValue("dtend").toJSDate(),
-          summary: vevent.getFirstPropertyValue("summary") || ""
-        }));
-        console.log("Parsed events:", events);
-        lastEvents = events; // Cache events
+        const events = vevents.map(vevent => {
+          const start = vevent.getFirstPropertyValue("dtstart")?.toJSDate();
+          const end = vevent.getFirstPropertyValue("dtend")?.toJSDate();
+          const summary = vevent.getFirstPropertyValue("summary") || "";
+          console.log("Parsed event:", { start, end, summary });
+          return { start, end, summary };
+        }).filter(e => e.start && e.end && !isNaN(e.start) && !isNaN(e.end));
+        console.log("All parsed events:", events);
+        return events;
+      } catch (error) {
+        console.error("ICS parsing failed:", error);
+        throw error;
+      }
+    }
+
+    async function loadICS() {
+      const statusEl = document.getElementById("status");
+      statusEl.classList.add("loading");
+      statusEl.textContent = "Fetching calendar...";
+      try {
+        const res = await fetchWithRetry(ICS_URLS);
+        const text = await res.text();
+        const events = await parseICS(text);
+        lastEvents = events;
         updateStatus(events);
       } catch (error) {
         console.error("Failed to load ICS:", error);
-        statusEl.textContent = "Unable to load calendar";
-        updateStatus(lastEvents); // Use cached events
+        statusEl.textContent = `ICS fetch failed: ${error.message}`;
+        statusEl.className = "error";
+        updateStatus(lastEvents.length ? lastEvents : []);
       } finally {
         statusEl.classList.remove("loading");
       }
     }
 
+    function getTestEvents() {
+      const today = new Date(2025, 9, 30); // Oct 30, 2025
+      return [
+        {
+          start: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 14, 0), // 2 PM
+          end: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 15, 0), // 3 PM
+          summary: "Test Team Meeting"
+        },
+        {
+          start: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 16, 0), // 4 PM
+          end: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 17, 0), // 5 PM
+          summary: "Test Client Review"
+        }
+      ];
+    }
+
     function updateStatus(events) {
+      if (typeof TEST_EVENTS !== 'undefined' && TEST_EVENTS) {
+        events = getTestEvents();
+        console.log("Using test events:", events);
+      }
+
       const now = new Date();
       const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
       const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
       const todayEvents = events
         .filter(e => e.start && e.end && e.start < todayEnd && e.end > todayStart)
-        .sort((a, b) => a.start - b.start); // Sort by start time
-      console.log("Today's events:", todayEvents);
+        .sort((a, b) => a.start - b.start);
+      console.log("Today's events (filtered):", todayEvents);
+      const allEvents = events; // Log all events for debugging
+      console.log("All events (unfiltered):", allEvents);
       const current = todayEvents.find(e => now >= e.start && now < e.end);
       const statusEl = document.getElementById("status");
       const eventListEl = document.getElementById("event-list");
@@ -266,7 +341,6 @@
         statusEl.className = "available";
       }
 
-      // Populate calendar grid
       eventListEl.innerHTML = todayEvents.length
         ? todayEvents.map(e => `<li>${formatTime(e.start)} - ${formatTime(e.end)}: ${e.summary || "Meeting"}</li>`).join("")
         : "<li>No events today</li>";
@@ -275,6 +349,29 @@
     function formatTime(date) {
       return date ? date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }) : "";
     }
+
+    // Manual ICS upload for testing
+    document.getElementById("ics-file").addEventListener("change", async (event) => {
+      const file = event.target.files[0];
+      if (file) {
+        const statusEl = document.getElementById("status");
+        statusEl.classList.add("loading");
+        statusEl.textContent = "Parsing uploaded ICS...";
+        try {
+          const text = await file.text();
+          const events = await parseICS(text);
+          lastEvents = events;
+          updateStatus(events);
+        } catch (error) {
+          console.error("Failed to parse uploaded ICS:", error);
+          statusEl.textContent = `ICS parse failed: ${error.message}`;
+          statusEl.className = "error";
+          updateStatus(lastEvents.length ? lastEvents : []);
+        } finally {
+          statusEl.classList.remove("loading");
+        }
+      }
+    });
 
     loadICS();
     setInterval(loadICS, 120000);
