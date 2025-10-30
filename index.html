@@ -21,58 +21,69 @@
     background-position: center;
     transition: background-image 2s ease-in-out;
     z-index: -1;
+    filter: brightness(0.85);
   }
 
   header {
+    position: absolute;
+    top: 20px;
+    left: 30px;
+    right: 30px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 20px 40px;
-    background: rgba(0, 0, 0, 0.4);
+    background: rgba(0, 0, 0, 0.35);
+    padding: 10px 20px;
+    border-radius: 10px;
+    backdrop-filter: blur(4px);
   }
 
   h1 {
     margin: 0;
-    font-size: 1.8rem;
+    font-size: 1.6rem;
     color: #f7b500;
   }
 
   .logo {
-    height: 55px;
+    height: 50px;
   }
 
   main {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: calc(100vh - 140px);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     text-align: center;
+    backdrop-filter: blur(5px);
+    background: rgba(0, 0, 0, 0.3);
+    padding: 30px 60px;
+    border-radius: 20px;
   }
 
   #time {
     font-size: 4rem;
     font-weight: 600;
-    margin-bottom: 10px;
+    margin-bottom: 5px;
   }
 
   #date {
     font-size: 1.3rem;
-    margin-bottom: 30px;
+    margin-bottom: 20px;
+    opacity: 0.9;
   }
 
   #status {
     font-size: 2rem;
     font-weight: 600;
-    margin-bottom: 40px;
+    margin: 20px 0;
   }
 
-  .available { color: #00c853; }
-  .busy { color: #ff5252; }
+  .available { color: #00ff88; }
+  .busy { color: #ff4c4c; }
 
   #weather {
-    font-size: 1.2rem;
-    opacity: 0.9;
+    font-size: 1.3rem;
+    opacity: 0.95;
   }
 
   footer {
@@ -81,7 +92,7 @@
     width: 100%;
     text-align: center;
     font-size: 1rem;
-    opacity: 0.7;
+    opacity: 0.6;
   }
 </style>
 </head>
@@ -90,23 +101,19 @@
 
   <header>
     <h1>Centennial – South Conference Room</h1>
-    <img
-      class="logo"
+    <img class="logo"
       src="https://wg.scene7.com/is/image/wrenchgroup/updated-2023-logo-pl23wi001wg?fmt=png-alpha"
-      alt="Plumbline Logo"
-    />
+      alt="Plumbline Logo" />
   </header>
 
   <main>
     <div id="time">--:--</div>
-    <div id="date">Loading date...</div>
+    <div id="date">Loading...</div>
     <div id="status" class="available">Loading schedule...</div>
     <div id="weather">Loading weather...</div>
   </main>
 
-  <footer>
-    Refreshes automatically every 2 minutes
-  </footer>
+  <footer>Auto-refreshes every 2 minutes</footer>
 
 <script>
 /* ---------- CONFIG ---------- */
@@ -149,10 +156,14 @@ async function loadWeather() {
       `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&temperature_unit=fahrenheit&current=temperature_2m,weathercode&timezone=auto`
     );
     const data = await res.json();
-    const codes = {0:"☀️",1:"🌤",2:"⛅",3:"☁️",45:"🌫",48:"🌫",51:"🌦",61:"🌧",71:"❄️",80:"🌧",95:"⛈"};
+    const codes = {
+      0: "☀️ Clear sky", 1: "🌤 Mostly sunny", 2: "⛅ Partly cloudy", 3: "☁️ Cloudy",
+      45: "🌫 Fog", 48: "🌫 Mist", 51: "🌦 Drizzle", 61: "🌧 Rain", 71: "❄️ Snow",
+      80: "🌧 Showers", 95: "⛈ Storm"
+    };
     const temp = Math.round(data.current.temperature_2m);
-    const icon = codes[data.current.weathercode] || "";
-    document.getElementById("weather").textContent = `${icon} ${temp}°F in Centennial`;
+    const icon = codes[data.current.weathercode] || "🌤";
+    document.getElementById("weather").textContent = `${icon}  ${temp}°F`;
   } catch {
     document.getElementById("weather").textContent = "Weather unavailable";
   }
