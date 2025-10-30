@@ -13,7 +13,6 @@
       color: #fff;
       overflow: hidden;
     }
-
     .background {
       position: fixed;
       inset: 0;
@@ -21,11 +20,9 @@
       background-position: center;
       transition: opacity 2s ease-in-out;
     }
-
     .fade {
       opacity: 0;
     }
-
     header {
       position: absolute;
       top: 20px;
@@ -36,76 +33,36 @@
       align-items: center;
       z-index: 2;
     }
-
     header h1 {
       font-size: 1.6rem;
-      font-weight: 600;
       color: #00539f;
       text-shadow: 0 0 8px rgba(0,0,0,0.4);
     }
-
     #logo {
       max-width: 170px;
       height: auto;
       opacity: 0.95;
     }
-
-    main {
-      position: relative;
-      z-index: 2;
-      padding: 0;
-    }
-
-    .left {
+    .info {
       position: absolute;
-      top: 100px;
+      top: 120px;
       left: 30px;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
+      z-index: 2;
     }
-
     .clock {
       font-size: 4rem;
-      font-weight: 600;
-      margin-bottom: 5px;
     }
-
     .date {
       font-size: 1.2rem;
-      margin-bottom: 10px;
       color: #f7b500;
+      margin-bottom: 10px;
     }
-
     #status {
       font-size: 1.3rem;
-      font-weight: 500;
-      margin-bottom: 20px;
+      margin-top: 10px;
     }
-
     #status.available { color: #00c853; }
     #status.busy { color: #e53935; }
-
-    .weather {
-      margin-top: 200px; /* ⬅ push weather down */
-      font-size: 1rem;
-    }
-
-    .temp {
-      font-size: 2rem;
-      font-weight: 600;
-    }
-
-    .forecast {
-      display: flex;
-      gap: 12px;
-      margin-top: 12px;
-      font-size: 0.85rem;
-    }
-
-    .forecast div {
-      text-align: center;
-    }
   </style>
 </head>
 <body>
@@ -115,21 +72,14 @@
 
   <header>
     <h1>Centennial – South Conference Room</h1>
-    <img id="logo" src="https://wg.scene7.com/is/image/wrenchgroup/updated-2023-logo-pl23wi001wg?fmt=png-alpha" alt="Plumbline Logo">
+    <img id="logo" src="https://wg.scene7.com/is/image/wrenchgroup/updated-2023-logo-pl23wi001wg?fmt=png-alpha" alt="Logo">
   </header>
 
-  <main>
-    <div class="left">
-      <div class="clock" id="clock">--:--</div>
-      <div class="date" id="date">Loading...</div>
-      <div id="status">Loading schedule...</div>
-      <div class="weather" id="weather">
-        <div class="temp" id="temp">--°F</div>
-        <div id="conditions"></div>
-        <div class="forecast" id="forecast"></div>
-      </div>
-    </div>
-  </main>
+  <div class="info">
+    <div class="clock" id="clock">--:--</div>
+    <div class="date" id="date">Loading...</div>
+    <div id="status">Loading schedule...</div>
+  </div>
 
   <script>
     const IMAGES = [
@@ -139,12 +89,9 @@
       "images/calphoto4.jpg",
       "images/calphoto5.jpg"
     ];
-
     const ICS_URL = "https://ics-proxy.highdefpants.workers.dev/?url=" + encodeURIComponent(
       "https://outlook.office365.com/owa/calendar/73ff77286546455d984e75751c99096d@plumblineservices.com/e8f33aaadcfb49e5b0a03df0bdb5e2c58129590484901015770/calendar.ics"
     );
-
-    const LAT = 39.5807, LON = -104.8772;
 
     let currentBg = 0;
     const bg1 = document.getElementById("bg1");
@@ -171,27 +118,6 @@
     setInterval(updateClock, 1000);
     updateClock();
 
-    async function loadWeather() {
-      try {
-        const url = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&temperature_unit=fahrenheit&current=temperature_2m,weathercode&daily=temperature_2m_max,temperature_2m_min,weathercode&forecast_days=4&timezone=auto`;
-        const res = await fetch(url);
-        const data = await res.json();
-        const codes = { 0:"☀️", 1:"🌤", 2:"⛅", 3:"☁️", 45:"🌫", 48:"🌫", 51:"🌦", 61:"🌧", 71:"❄️", 80:"🌧", 95:"⛈" };
-        document.getElementById("temp").textContent = Math.round(data.current.temperature_2m) + "°F";
-        document.getElementById("conditions").textContent = codes[data.current.weathercode] || "";
-        const fc = document.getElementById("forecast");
-        fc.innerHTML = "";
-        for (let i = 1; i < data.daily.time.length; i++) {
-          const d = new Date(data.daily.time[i]);
-          fc.innerHTML += `<div>${["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][d.getDay()]}<br>${codes[data.daily.weathercode[i]] || ""}<br><small>${Math.round(data.daily.temperature_2m_max[i])}°/${Math.round(data.daily.temperature_2m_min[i])}°</small></div>`;
-        }
-      } catch (e) {
-        console.log("Weather error", e);
-      }
-    }
-    loadWeather();
-    setInterval(loadWeather, 1800000);
-
     async function loadICS() {
       try {
         const res = await fetch(ICS_URL);
@@ -207,46 +133,45 @@
           else if (line.startsWith("DTEND")) current.end = parseDate(line);
           else if (line.startsWith("END:VEVENT")) events.push(current);
         }
-
         updateStatus(events);
       } catch (e) {
         document.getElementById("status").textContent = "Unable to load schedule";
-        console.error("ICS error", e);
       }
     }
 
     function parseDate(line) {
       const match = line.match(/(\d{8}T\d{6})(Z)?$/);
       if (!match) return null;
-      const dateStr = match[1];
-      const isUtc = !!match[2];
-      const year = dateStr.substr(0, 4),
-            mon = dateStr.substr(4, 2),
-            day = dateStr.substr(6, 2),
-            hour = dateStr.substr(9, 2),
-            min = dateStr.substr(11, 2),
-            sec = dateStr.substr(13, 2);
-      const iso = `${year}-${mon}-${day}T${hour}:${min}:${sec}${isUtc ? "Z" : ""}`;
+      const [_, dateStr, isZ] = match;
+      const [year, month, day, hour, min, sec] = [
+        dateStr.slice(0, 4), dateStr.slice(4, 6), dateStr.slice(6, 8),
+        dateStr.slice(9, 11), dateStr.slice(11, 13), dateStr.slice(13, 15)
+      ];
+      const iso = `${year}-${month}-${day}T${hour}:${min}:${sec}${isZ ? "Z" : ""}`;
       return new Date(iso);
     }
 
     function updateStatus(events) {
       const now = new Date();
-      const todayEvents = events.filter(e => e.start && e.start.toDateString() === now.toDateString());
+      const today = now.toDateString();
+      const todayEvents = events.filter(e => e.start && e.start.toDateString() === today);
       const ongoing = todayEvents.find(e => now >= e.start && now < e.end);
       const statusEl = document.getElementById("status");
+
       if (ongoing) {
-        statusEl.textContent = "🔴 In Use – " + (ongoing.summary || "Meeting") + " until " + formatTime(ongoing.end);
+        statusEl.textContent = `🔴 In Use – ${ongoing.summary} until ${formatTime(ongoing.end)}`;
         statusEl.className = "busy";
       } else {
         const next = todayEvents.find(e => e.start > now);
-        statusEl.textContent = next ? "🟢 Available until " + formatTime(next.start) : "🟢 Available all day";
+        statusEl.textContent = next
+          ? `🟢 Available until ${formatTime(next.start)}`
+          : "🟢 Available all day";
         statusEl.className = "available";
       }
     }
 
-    function formatTime(d) {
-      return d ? d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }) : "";
+    function formatTime(date) {
+      return date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
     }
 
     loadICS();
