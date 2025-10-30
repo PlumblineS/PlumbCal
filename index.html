@@ -7,34 +7,47 @@
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
         body, html { height:100%; font-family: 'Segoe UI', sans-serif; color:#fff; overflow:hidden; }
+        
+        /* Rotating Background */
         #background {
             position:fixed; top:0; left:0; width:100%; height:100%;
-            background:url('images/calphoto4.jpg') center/cover no-repeat;
+            background-size: cover; background-position: center;
             filter: blur(3px) brightness(0.7);
             z-index:-2;
+            transition: background 1s ease-in-out;
         }
-        header, main, footer { position:relative; z-index:1; padding:1rem; }
+
+        header, main, footer { position:relative; z-index:1; padding:1.5rem; }
         header { display:flex; justify-content:space-between; align-items:center; }
-        .logo { height:50px; }
-        #clock { font-size:4rem; text-align:center; margin:1rem 0; line-height:1.2; }
-        #availability { font-size:1.5rem; text-align:center; margin:1rem 0; }
-        .dot { display:inline-block; width:12px; height:12px; border-radius:50%; background:#0f0; margin-right:8px; vertical-align:middle; }
-        #schedule { max-width:600px; margin:2rem auto; }
-        .event { background:rgba(0,0,0,0.4); margin:0.5rem 0; padding:0.8rem; border-left:4px solid #ff9800; border-radius:4px; }
-        .event time { font-weight:bold; }
-        #upload { text-align:center; margin:2rem 0; }
-        footer { text-align:center; font-size:0.9rem; opacity:0.8; position:absolute; bottom:10px; left:0; right:0; }
-        
-        /* Weather: Bottom Left */
+        .logo { height:60px; filter: drop-shadow(0 0 4px #000); }
+
+        #clock { font-size:4.5rem; text-align:center; margin:1rem 0; line-height:1.2; }
+        #availability { font-size:1.6rem; text-align:center; margin:1.5rem 0; }
+        .dot { display:inline-block; width:14px; height:14px; border-radius:50%; background:#0f0; margin-right:10px; vertical-align:middle; animation:pulse 2s infinite; }
+
+        #schedule { max-width:700px; margin:2rem auto; }
+        .event { background:rgba(0,0,0,0.5); margin:0.8rem 0; padding:1rem; border-left:5px solid #ff9800; border-radius:6px; backdrop-filter: blur(4px); }
+        .event time { font-weight:bold; font-size:1.1rem; }
+
+        /* Weather Bottom Left */
         #weather {
             position: absolute;
-            bottom: 60px;
+            bottom: 20px;
             left: 20px;
+            background: rgba(0,0,0,0.4);
+            padding: 0.8rem 1.2rem;
+            border-radius: 12px;
+            backdrop-filter: blur(6px);
             font-size: 1.1rem;
-            background: rgba(0,0,0,0.3);
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            backdrop-filter: blur(4px);
+            line-height: 1.5;
+        }
+
+        footer { text-align:center; font-size:0.9rem; opacity:0.8; position:absolute; bottom:10px; left:0; right:0; }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(0,255,0,0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(0,255,0,0); }
+            100% { box-shadow: 0 0 0 0 rgba(0,255,0,0); }
         }
     </style>
 </head>
@@ -51,9 +64,6 @@
     <div id="clock"></div>
     <div id="availability"></div>
     <div id="schedule"></div>
-    <div id="upload">
-        <p>Upload ICS file for testing: <input type="file" id="icsFile" accept=".ics"></p>
-    </div>
 </main>
 
 <div id="weather"></div>
@@ -63,48 +73,56 @@
 /* ==============================================================
    CONFIG
    ============================================================== */
-const ICS_URL = 'plumbline-south.ics';  // Must be in same folder
+const ICS_URL = 'plumbline-south.ics';
+const IMAGES = [
+    'images/calphoto4.jpg',
+    'images/calphoto1.jpg',
+    'images/calphoto2.jpg',
+    'images/calphoto3.jpg'
+];
+let imgIndex = 0;
 
 /* ==============================================================
-   UTILS
+   ROTATING BACKGROUND
    ============================================================== */
-function pad(n){return n<10?'0'+n:n;}
-function formatTime(d){
-    const h = d.getHours() % 12 || 12;
-    const m = pad(d.getMinutes());
-    const ampm = d.getHours() < 12 ? 'AM' : 'PM';
-    return `${h}:${m} ${ampm}`;
+function rotateBackground() {
+    document.getElementById('background').style.backgroundImage = `url('${IMAGES[imgIndex]}')`;
+    imgIndex = (imgIndex + 1) % IMAGES.length;
 }
-function formatDate(d){
-    return d.toLocaleDateString('en-US', {weekday:'long', month:'long', day:'numeric'});
-}
+rotateBackground();
+setInterval(rotateBackground, 10000); // every 10 sec
 
-/* --------------------------------------------------------------
+/* ==============================================================
    CLOCK
-   -------------------------------------------------------------- */
+   ============================================================== */
 function updateClock(){
     const now = new Date();
+    const h = now.getHours() % 12 || 12;
+    const m = now.getMinutes().toString().padStart(2, '0');
+    const ampm = now.getHours() < 12 ? 'AM' : 'PM';
+    const date = now.toLocaleDateString('en-US', {weekday:'long', month:'long', day:'numeric'});
+    
     document.getElementById('clock').innerHTML = `
-        <div style="font-size:4rem;">${formatTime(now)}</div>
-        <div style="font-size:1.5rem;opacity:0.9;">${formatDate(now)}</div>
+        <div>${h}:${m} ${ampm}</div>
+        <div style="font-size:1.6rem;opacity:0.9;">${date}</div>
     `;
 }
 setInterval(updateClock, 1000);
 updateClock();
 
-/* --------------------------------------------------------------
-   WEATHER (Bottom Left)
-   -------------------------------------------------------------- */
+/* ==============================================================
+   WEATHER (with icons)
+   ============================================================== */
 document.getElementById('weather').innerHTML = `
     <div><strong>48°F in Centennial</strong></div>
-    <div style="font-size:0.9rem;opacity:0.9;">
-        Thu: 47°/26° • Fri: 60°/24° • Sat: 74°/46°
+    <div style="font-size:0.95rem;opacity:0.9;">
+        Thu: 47°/26° ☁️ • Fri: 60°/24° ☀️ • Sat: 74°/46° ⛅
     </div>
 `;
 
-/* --------------------------------------------------------------
-   ICS PARSING
-   -------------------------------------------------------------- */
+/* ==============================================================
+   ICS PARSING (UTC + Local Fix)
+   ============================================================== */
 function parseICS(text){
     const events = [];
     const blocks = text.match(/BEGIN:VEVENT[\s\S]*?END:VEVENT/g) || [];
@@ -115,7 +133,7 @@ function parseICS(text){
         
         lines.forEach(l => {
             if (l.startsWith('DTSTART')) {
-                const val = l.split(':')[1,1];
+                const val = l.split(':')[1];
                 ev.start = parseDate(val);
             }
             if (l.startsWith('DTEND')) {
@@ -125,7 +143,6 @@ function parseICS(text){
             if (l.startsWith('SUMMARY')) {
                 ev.title = l.split(':').slice(1).join(':').trim();
             }
-            if (l.includes('VALUE=DATE')) ev.allDay = true;
         });
         
         if (ev.start && ev.title) events.push(ev);
@@ -137,22 +154,23 @@ function parseDate(str){
     str = str.replace(/[^0-9TZ]/g, '');
     if (!str) return null;
     
-    if (str.length === 8) { // YYYYMMDD
-        return new Date(str.slice(0,4), str.slice(4,6)-1, str.slice(6,8));
-    }
-    if (str.length >= 15 && str.endsWith('Z')) { // UTC
+    if (str.endsWith('Z')) {
+        // UTC → convert to local
         return new Date(str);
     }
-    if (str.length >= 14) { // Local: YYYYMMDDTHHMMSS
+    if (str.length === 8) {
+        return new Date(str.slice(0,4), str.slice(4,6)-1, str.slice(6,8));
+    }
+    if (str.length >= 15) {
         return new Date(str.slice(0,4), str.slice(4,6)-1, str.slice(6,8),
                         str.slice(8,10), str.slice(10,12), str.slice(12,14));
     }
     return null;
 }
 
-/* --------------------------------------------------------------
+/* ==============================================================
    DISPLAY
-   -------------------------------------------------------------- */
+   ============================================================== */
 function displaySchedule(events){
     const sched = document.getElementById('schedule');
     sched.innerHTML = '';
@@ -171,9 +189,16 @@ function displaySchedule(events){
     });
 }
 
-/* --------------------------------------------------------------
+function formatTime(d){
+    const h = d.getHours() % 12 || 12;
+    const m = d.getMinutes().toString().padStart(2, '0');
+    const ampm = d.getHours() < 12 ? 'AM' : 'PM';
+    return `${h}:${m} ${ampm}`;
+}
+
+/* ==============================================================
    AVAILABILITY
-   -------------------------------------------------------------- */
+   ============================================================== */
 function updateAvailability(events){
     const now = new Date();
     const upcoming = events.filter(e => e.start > now);
@@ -186,13 +211,13 @@ function updateAvailability(events){
     
     const next = upcoming[0];
     const until = formatTime(next.start);
-    const title = next.title.split(' - ')[0]; // Clean title
+    const title = next.title.split(' - ')[0];
     avail.innerHTML = `<span class="dot"></span> Available until ${until} (${title})`;
 }
 
-/* --------------------------------------------------------------
+/* ==============================================================
    LOAD ICS
-   -------------------------------------------------------------- */
+   ============================================================== */
 function loadICS(){
     fetch(ICS_URL)
         .then(r => {
@@ -203,9 +228,7 @@ function loadICS(){
             const allEvents = parseICS(text);
             const today = new Date();
             const todayEvents = allEvents.filter(e => {
-                return e.start.getFullYear() === today.getFullYear() &&
-                       e.start.getMonth() === today.getMonth() &&
-                       e.start.getDate() === today.getDate();
+                return e.start.toDateString() === today.toDateString();
             });
             
             displaySchedule(todayEvents);
@@ -214,34 +237,13 @@ function loadICS(){
         .catch(err => {
             console.error('ICS load failed:', err);
             document.getElementById('schedule').innerHTML = 
-                '<p style="color:#f88;text-align:center;">Failed to load calendar</p>';
+                '<p style="color:#f88;text-align:center;">Calendar failed to load</p>';
         });
 }
 
-/* --------------------------------------------------------------
-   TEST FILE UPLOAD
-   -------------------------------------------------------------- */
-document.getElementById('icsFile').addEventListener('change', e => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = ev => {
-        const allEvents = parseICS(ev.target.result);
-        const today = new Date();
-        const todayEvents = allEvents.filter(e => 
-            e.start.getFullYear() === today.getFullYear() &&
-            e.start.getMonth() === today.getMonth() &&
-            e.start.getDate() === today.getDate()
-        );
-        displaySchedule(todayEvents);
-        updateAvailability(allEvents);
-    };
-    reader.readAsText(file);
-});
-
-/* --------------------------------------------------------------
+/* ==============================================================
    AUTO-REFRESH
-   -------------------------------------------------------------- */
+   ============================================================== */
 loadICS();
 setInterval(loadICS, 120000); // 2 minutes
 </script>
