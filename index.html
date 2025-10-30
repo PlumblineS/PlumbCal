@@ -94,6 +94,7 @@
       }
     </style>
   </head>
+
   <body>
     <header>
       <img
@@ -119,7 +120,7 @@
     </footer>
 
     <script>
-      /* ---------- CLOCK & DATE ---------- */
+      /* ---------- CLOCK ---------- */
       function updateTime() {
         const now = new Date();
         document.getElementById("time").textContent = now.toLocaleTimeString(
@@ -136,29 +137,30 @@
 
       /* ---------- CALENDAR ---------- */
       const ICS_URL =
-        "https://api.allorigins.win/raw?url=" +
+        "https://corsproxy.io/?" +
         encodeURIComponent(
           "https://outlook.office365.com/owa/calendar/73ff77286546455d984e75751c99096d@plumblineservices.com/e8f33aaadcfb49e5b0a03df0bdb5e2c58129590484901015770/calendar.ics"
         );
 
       async function loadCalendar() {
         try {
-          const response = await fetch(ICS_URL);
+          const response = await fetch(ICS_URL, { cache: "no-store" });
+          if (!response.ok) throw new Error("Calendar fetch failed");
           const icsText = await response.text();
+          console.log("ICS length:", icsText.length);
 
           const events = [];
-          const regex =
-            /BEGIN:VEVENT[\s\S]*?SUMMARY:(.*?)\s*DTSTART.*?:(.*?)\s*DTEND.*?:(.*?)\s*END:VEVENT/g;
-          let match;
-          while ((match = regex.exec(icsText))) {
-            const summary = match[1].replace(/\\n/g, "").trim();
-            const startRaw = match[2].trim();
-            const endRaw = match[3].trim();
-
-            const start = parseICSDate(startRaw);
-            const end = parseICSDate(endRaw);
-
-            if (start && end) events.push({ summary, start, end });
+          const rawEvents = icsText.split("BEGIN:VEVENT").slice(1);
+          for (let block of rawEvents) {
+            const summaryMatch = block.match(/SUMMARY:(.+)/);
+            const startMatch = block.match(/DTSTART[^:]*:(.+)/);
+            const endMatch = block.match(/DTEND[^:]*:(.+)/);
+            if (summaryMatch && startMatch && endMatch) {
+              const summary = summaryMatch[1].replace(/\\n/g, " ").trim();
+              const start = parseICSDate(startMatch[1]);
+              const end = parseICSDate(endMatch[1]);
+              if (start && end) events.push({ summary, start, end });
+            }
           }
 
           const now = new Date();
@@ -179,9 +181,9 @@
             )}`;
           } else if (next) {
             statusEl.textContent = "🟢 Available";
-            nextEl.textContent = `Until ${formatTime(
-              next.start
-            )} – Next: ${next.summary}`;
+            nextEl.textContent = `Until ${formatTime(next.start)} – Next: ${
+              next.summary
+            }`;
           } else {
             statusEl.textContent = "🟢 Available all day";
             nextEl.textContent = "";
@@ -190,9 +192,9 @@
           document.getElementById("updated").textContent =
             "Updated " + new Date().toLocaleTimeString();
         } catch (err) {
-          console.error(err);
+          console.error("Calendar error:", err);
           document.getElementById("status").textContent =
-            "Error loading schedule";
+            "Error loading schedule (check console)";
         }
       }
 
@@ -225,7 +227,7 @@
       }
 
       loadCalendar();
-      setInterval(loadCalendar, 120000); // refresh every 2 min
+      setInterval(loadCalendar, 120000);
 
       /* ---------- WEATHER ---------- */
       const WEATHER_URL =
