@@ -59,15 +59,19 @@
       height: 100vh;
       padding: 0 30px;
       display: flex;
-      flex-direction: column;
       justify-content: space-between;
+      align-items: center;
+    }
+
+    .left-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
     }
 
     .middle-box {
-      position: absolute;
-      top: 40%;
-      left: 50%;
-      transform: translate(-50%, -50%);
       text-align: center;
     }
 
@@ -117,6 +121,93 @@
       left: 30px;
     }
 
+    .calendar-container {
+      width: 33%;
+      max-width: 450px;
+      background: rgba(40, 40, 40, 0.7);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      padding: 25px;
+      margin-right: 20px;
+      align-self: center;
+    }
+
+    .calendar-header {
+      text-align: center;
+      font-size: 1.4rem;
+      font-weight: 600;
+      margin-bottom: 20px;
+      color: #f7b500;
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+    }
+
+    .calendar-day-name {
+      text-align: center;
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 8px 0;
+      color: #00539f;
+    }
+
+    .calendar-day {
+      aspect-ratio: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: rgba(60, 60, 60, 0.5);
+      border-radius: 6px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background 0.2s;
+      position: relative;
+      padding: 4px;
+    }
+
+    .calendar-day:hover {
+      background: rgba(80, 80, 80, 0.7);
+    }
+
+    .calendar-day.today {
+      background: rgba(0, 83, 159, 0.6);
+      font-weight: 700;
+    }
+
+    .calendar-day.has-events {
+      border: 2px solid #f7b500;
+    }
+
+    .calendar-day.other-month {
+      opacity: 0.3;
+    }
+
+    .day-number {
+      font-size: 0.95rem;
+      margin-bottom: 2px;
+    }
+
+    .event-indicator {
+      font-size: 0.65rem;
+      color: #f7b500;
+      text-align: center;
+      line-height: 1.1;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .event-count {
+      font-size: 0.7rem;
+      color: #00c853;
+      margin-top: 2px;
+    }
+
     .temp {
       font-size: 2rem;
       font-weight: 600;
@@ -145,12 +236,20 @@
   </header>
 
   <main>
-    <!-- Center: Clock, Date, Status -->
-    <div class="middle-box">
-      <div class="clock" id="clock">--:--</div>
-      <div class="date" id="date">Loading...</div>
-      <div id="status">Loading schedule...</div>
-      <div class="upcoming" id="upcoming"></div>
+    <div class="left-content">
+      <!-- Center: Clock, Date, Status -->
+      <div class="middle-box">
+        <div class="clock" id="clock">--:--</div>
+        <div class="date" id="date">Loading...</div>
+        <div id="status">Loading schedule...</div>
+        <div class="upcoming" id="upcoming"></div>
+      </div>
+    </div>
+
+    <!-- Right: Month Calendar -->
+    <div class="calendar-container">
+      <div class="calendar-header" id="calendar-header">October 2024</div>
+      <div class="calendar-grid" id="calendar-grid"></div>
     </div>
 
     <!-- Bottom: Weather -->
@@ -246,6 +345,7 @@
         }
 
         updateStatus(events);
+        buildCalendar(events);
       } catch (e) {
         document.getElementById("status").textContent = "Unable to load schedule";
         console.error("ICS error", e);
@@ -303,6 +403,89 @@
 
     loadICS();
     setInterval(loadICS, 120000);
+
+    // Build month calendar
+    function buildCalendar(events) {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = now.getMonth();
+      
+      // Update header
+      const monthNames = ["January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"];
+      document.getElementById("calendar-header").textContent = `${monthNames[month]} ${year}`;
+      
+      // Get first day of month and number of days
+      const firstDay = new Date(year, month, 1);
+      const lastDay = new Date(year, month + 1, 0);
+      const daysInMonth = lastDay.getDate();
+      const startingDayOfWeek = firstDay.getDay();
+      
+      // Get last month's days to fill in
+      const prevMonthLastDay = new Date(year, month, 0).getDate();
+      
+      const grid = document.getElementById("calendar-grid");
+      grid.innerHTML = "";
+      
+      // Day names
+      const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+      dayNames.forEach(name => {
+        const dayName = document.createElement("div");
+        dayName.className = "calendar-day-name";
+        dayName.textContent = name;
+        grid.appendChild(dayName);
+      });
+      
+      // Previous month's trailing days
+      for (let i = startingDayOfWeek - 1; i >= 0; i--) {
+        const day = document.createElement("div");
+        day.className = "calendar-day other-month";
+        day.innerHTML = `<div class="day-number">${prevMonthLastDay - i}</div>`;
+        grid.appendChild(day);
+      }
+      
+      // Current month's days
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dayEl = document.createElement("div");
+        const dayDate = new Date(year, month, day);
+        const isToday = day === now.getDate() && month === now.getMonth();
+        
+        dayEl.className = "calendar-day" + (isToday ? " today" : "");
+        
+        // Find events for this day
+        const dayEvents = events.filter(e => {
+          if (!e.start) return false;
+          return e.start.getDate() === day && 
+                 e.start.getMonth() === month && 
+                 e.start.getFullYear() === year;
+        });
+        
+        let innerHTML = `<div class="day-number">${day}</div>`;
+        
+        if (dayEvents.length > 0) {
+          dayEl.classList.add("has-events");
+          // Show first event name (truncated)
+          const firstEvent = dayEvents[0].summary || "Meeting";
+          innerHTML += `<div class="event-indicator">${firstEvent}</div>`;
+          if (dayEvents.length > 1) {
+            innerHTML += `<div class="event-count">+${dayEvents.length - 1} more</div>`;
+          }
+        }
+        
+        dayEl.innerHTML = innerHTML;
+        grid.appendChild(dayEl);
+      }
+      
+      // Next month's leading days
+      const totalCells = grid.children.length - 7; // minus day names
+      const remainingCells = 35 - totalCells; // 5 weeks of days
+      for (let day = 1; day <= remainingCells; day++) {
+        const dayEl = document.createElement("div");
+        dayEl.className = "calendar-day other-month";
+        dayEl.innerHTML = `<div class="day-number">${day}</div>`;
+        grid.appendChild(dayEl);
+      }
+    }
   </script>
 </body>
 </html>
