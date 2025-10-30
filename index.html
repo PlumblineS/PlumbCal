@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -207,4 +208,44 @@
         else if (line.startsWith("DTSTART")) current.start = parseDate(line);
         else if (line.startsWith("DTEND")) current.end = parseDate(line);
         else if (line.startsWith("SUMMARY")) current.summary = line.split(":")[1] || "";
-        else if (line.startsWith
+        else if (line.startsWith("DESCRIPTION")) current.desc = line.split(":")[1] || "";
+      }
+      return events;
+    }
+
+    function renderMeetings(events) {
+      const now = new Date();
+      const upcoming = events.filter(e => e.end > now).sort((a,b) => a.start - b.start);
+      const nextTwo = upcoming.slice(0, 2);
+
+      const statusEl = document.getElementById("status");
+      const current = upcoming.find(e => e.start <= now && e.end > now);
+      if (current) {
+        statusEl.textContent = `In Use (${formatTime(current.start)} – ${formatTime(current.end)})`;
+        statusEl.className = "status busy";
+      } else {
+        statusEl.textContent = "Available";
+        statusEl.className = "status available";
+      }
+
+      let html = "";
+      for (let e of nextTwo) {
+        html += `
+          <div class="meeting">
+            <time>${formatTime(e.start)} – ${formatTime(e.end)}</time>
+            <h3>${e.summary || "Untitled Meeting"}</h3>
+          </div>
+        `;
+      }
+      document.getElementById("meetings").innerHTML = html || "<p>No upcoming meetings</p>";
+    }
+
+    function formatTime(date) {
+      return date ? date.toLocaleTimeString([], {hour: "2-digit", minute: "2-digit"}) : "";
+    }
+
+    loadCalendar();
+    setInterval(loadCalendar, 120000); // refresh every 2 minutes
+  </script>
+</body>
+</html>
