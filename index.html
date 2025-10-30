@@ -53,17 +53,15 @@
     main {
       position: relative;
       z-index: 2;
-      padding: 120px 30px 30px;
+      height: 100vh;
+      padding: 0 30px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      height: 100vh;
     }
 
-    .info {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
+    .clock-date {
+      margin-top: 110px;
     }
 
     .clock {
@@ -73,22 +71,20 @@
 
     .date {
       font-size: 1.2rem;
-      margin-bottom: 20px;
       color: #f7b500;
     }
 
     #status {
-      font-size: 1.3rem;
-      font-weight: 500;
-      margin: 10px 0 25px;
+      font-size: 1.6rem;
+      font-weight: 600;
+      margin-top: 80px;
     }
 
     #status.available { color: #00c853; }
     #status.busy { color: #e53935; }
 
     .weather {
-      font-size: 1rem;
-      margin-top: auto;
+      margin-bottom: 40px;
     }
 
     .temp {
@@ -119,16 +115,20 @@
   </header>
 
   <main>
-    <div class="info">
+    <!-- Top: Clock & Date -->
+    <div class="clock-date">
       <div class="clock" id="clock">--:--</div>
       <div class="date" id="date">Loading...</div>
-      <div id="status">Loading schedule...</div>
+    </div>
 
-      <div class="weather" id="weather">
-        <div class="temp" id="temp">--°F</div>
-        <div id="conditions"></div>
-        <div class="forecast" id="forecast"></div>
-      </div>
+    <!-- Middle: Room Availability -->
+    <div id="status">Loading schedule...</div>
+
+    <!-- Bottom: Weather -->
+    <div class="weather" id="weather">
+      <div class="temp" id="temp">--°F</div>
+      <div id="conditions"></div>
+      <div class="forecast" id="forecast"></div>
     </div>
   </main>
 
