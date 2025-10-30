@@ -7,7 +7,6 @@
     <style>
       body {
         font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-        background: linear-gradient(180deg, #004c97, #0072ce);
         color: white;
         text-align: center;
         margin: 0;
@@ -16,6 +15,10 @@
         display: flex;
         flex-direction: column;
         justify-content: space-between;
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        transition: background-image 1s ease-in-out;
       }
 
       header {
@@ -206,7 +209,13 @@
             const day = parseInt(date.slice(6, 8));
             const hour = parseInt(time.slice(0, 2));
             const minute = parseInt(time.slice(2, 4));
-            return new Date(year, month, day, hour, minute);
+
+            // Handle UTC timestamps
+            if (str.endsWith("Z")) {
+              return new Date(Date.UTC(year, month, day, hour, minute));
+            } else {
+              return new Date(year, month, day, hour, minute);
+            }
           } else {
             const year = parseInt(str.slice(0, 4));
             const month = parseInt(str.slice(4, 6)) - 1;
@@ -278,6 +287,25 @@
 
       loadWeather();
       setInterval(loadWeather, 600000);
+
+      /* ---------- BACKGROUND ROTATION ---------- */
+      const backgroundImages = [
+        "calphoto1.jpg",
+        "calphoto2.jpg",
+        "calphoto3.jpg",
+        "calphoto4.jpg",
+        "calphoto5.jpg"
+      ];
+
+      let bgIndex = 0;
+
+      function rotateBackground() {
+        document.body.style.backgroundImage = `url('${backgroundImages[bgIndex]}')`;
+        bgIndex = (bgIndex + 1) % backgroundImages.length;
+      }
+
+      rotateBackground();
+      setInterval(rotateBackground, 10000); // every 10 seconds
     </script>
   </body>
 </html>
