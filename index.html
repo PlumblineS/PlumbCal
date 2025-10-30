@@ -1,251 +1,230 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Centennial – South Conference Room</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: "Segoe UI", sans-serif;
-      color: white;
-      background-size: cover;
-      background-position: center;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      transition: background-image 1s ease-in-out;
-      background-color: #000;
-    }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Centennial – South Conference Room</title>
+<style>
+  body {
+    margin: 0;
+    font-family: "Segoe UI", sans-serif;
+    color: #fff;
+    background-color: #000;
+    height: 100vh;
+    overflow: hidden;
+  }
 
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 20px 40px;
-      background: rgba(0, 0, 0, 0.3);
-    }
+  .background {
+    position: fixed;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    transition: background-image 2s ease-in-out;
+    z-index: -1;
+  }
 
-    h1 {
-      font-size: 2em;
-      margin: 0;
-    }
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 40px;
+    background: rgba(0, 0, 0, 0.4);
+  }
 
-    .logo {
-      height: 60px;
-    }
+  h1 {
+    margin: 0;
+    font-size: 1.8rem;
+    color: #f7b500;
+  }
 
-    .main {
-      display: flex;
-      justify-content: space-between;
-      padding: 40px;
-      flex: 1;
-    }
+  .logo {
+    height: 55px;
+  }
 
-    .left {
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
+  main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: calc(100vh - 140px);
+    text-align: center;
+  }
 
-    .time {
-      font-size: 4em;
-      font-weight: 500;
-    }
+  #time {
+    font-size: 4rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
 
-    .date {
-      font-size: 1.5em;
-      opacity: 0.8;
-    }
+  #date {
+    font-size: 1.3rem;
+    margin-bottom: 30px;
+  }
 
-    .status {
-      font-size: 2em;
-      font-weight: 600;
-      margin-top: 30px;
-    }
+  #status {
+    font-size: 2rem;
+    font-weight: 600;
+    margin-bottom: 40px;
+  }
 
-    .available {
-      color: #4caf50;
-    }
+  .available { color: #00c853; }
+  .busy { color: #ff5252; }
 
-    .busy {
-      color: #f44336;
-    }
+  #weather {
+    font-size: 1.2rem;
+    opacity: 0.9;
+  }
 
-    .weather {
-      font-size: 1.2em;
-      margin-top: 40px;
-      opacity: 0.9;
-    }
-
-    .right {
-      text-align: right;
-      max-width: 40%;
-    }
-
-    .meeting {
-      margin-bottom: 15px;
-      background: rgba(0, 0, 0, 0.4);
-      padding: 10px;
-      border-radius: 8px;
-    }
-
-    .meeting time {
-      font-size: 1em;
-      color: #ccc;
-    }
-
-    .meeting h3 {
-      margin: 5px 0;
-      font-size: 1.2em;
-    }
-  </style>
+  footer {
+    position: absolute;
+    bottom: 15px;
+    width: 100%;
+    text-align: center;
+    font-size: 1rem;
+    opacity: 0.7;
+  }
+</style>
 </head>
 <body>
+  <div class="background" id="background"></div>
+
   <header>
     <h1>Centennial – South Conference Room</h1>
-    <img class="logo" src="images/plumbline-logo.png" alt="Plumbline Logo" />
+    <img
+      class="logo"
+      src="https://wg.scene7.com/is/image/wrenchgroup/updated-2023-logo-pl23wi001wg?fmt=png-alpha"
+      alt="Plumbline Logo"
+    />
   </header>
 
-  <div class="main">
-    <div class="left">
-      <div>
-        <div class="time" id="time"></div>
-        <div class="date" id="date"></div>
-        <div class="status" id="status"></div>
-        <div class="weather" id="weather"></div>
-      </div>
-    </div>
+  <main>
+    <div id="time">--:--</div>
+    <div id="date">Loading date...</div>
+    <div id="status" class="available">Loading schedule...</div>
+    <div id="weather">Loading weather...</div>
+  </main>
 
-    <div class="right" id="meetings">
-      <p>Loading schedule...</p>
-    </div>
-  </div>
+  <footer>
+    Refreshes automatically every 2 minutes
+  </footer>
 
-  <script>
-    // 🖼️ Background images
-    const images = [
-      "images/calphoto1.jpg",
-      "images/calphoto2.jpg",
-      "images/calphoto3.jpg",
-      "images/calphoto4.jpg",
-      "images/calphoto5.jpg"
-    ];
-    let currentImage = 0;
-    function cycleBackground() {
-      document.body.style.backgroundImage = `url('${images[currentImage]}')`;
-      currentImage = (currentImage + 1) % images.length;
-    }
-    cycleBackground();
-    setInterval(cycleBackground, 15000); // every 15 seconds
+<script>
+/* ---------- CONFIG ---------- */
+const IMAGES = [
+  "images/calphoto1.jpg",
+  "images/calphoto2.jpg",
+  "images/calphoto3.jpg",
+  "images/calphoto4.jpg",
+  "images/calphoto5.jpg"
+];
+const ICS_URL =
+  "https://api.allorigins.win/raw?url=" +
+  encodeURIComponent(
+    "https://outlook.office365.com/owa/calendar/73ff77286546455d984e75751c99096d@plumblineservices.com/11007c9e19554a799267ce38e79446506920446490200924026/calendar.ics"
+  );
+const LAT = 39.5807, LON = -104.8772;
 
-    // ⏰ Time + Date
-    function updateClock() {
-      const now = new Date();
-      document.getElementById("time").textContent = now.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
-      document.getElementById("date").textContent = now.toLocaleDateString([], {weekday: 'long', month: 'long', day: 'numeric'});
-    }
-    updateClock();
-    setInterval(updateClock, 1000);
+/* ---------- BACKGROUND ROTATION ---------- */
+let currentImage = 0;
+function changeBackground() {
+  document.getElementById("background").style.backgroundImage = `url('${IMAGES[currentImage]}')`;
+  currentImage = (currentImage + 1) % IMAGES.length;
+}
+changeBackground();
+setInterval(changeBackground, 15000);
 
-    // 🌤️ Weather
-    async function loadWeather() {
-      try {
-        const res = await fetch("https://wttr.in/Centennial?format=%t+%C");
-        const text = await res.text();
-        document.getElementById("weather").textContent = "Weather: " + text.replace("+", "") + "°F";
-      } catch {
-        document.getElementById("weather").textContent = "Weather unavailable";
-      }
-    }
-    loadWeather();
-    setInterval(loadWeather, 900000);
+/* ---------- CLOCK ---------- */
+function updateClock() {
+  const now = new Date();
+  document.getElementById("time").textContent = now.toLocaleTimeString([], {hour: "2-digit", minute: "2-digit"});
+  document.getElementById("date").textContent = now.toLocaleDateString([], {weekday: "long", month: "long", day: "numeric"});
+}
+updateClock();
+setInterval(updateClock, 1000);
 
-    // 📅 Calendar Fetch
-    const ICS_URL =
-      "https://api.allorigins.win/raw?url=" +
-      encodeURIComponent(
-        "https://outlook.office365.com/owa/calendar/73ff77286546455d984e75751c99096d@plumblineservices.com/11007c9e19554a799267ce38e79446506920446490200924026/calendar.ics"
-      );
+/* ---------- WEATHER ---------- */
+async function loadWeather() {
+  try {
+    const res = await fetch(
+      `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&temperature_unit=fahrenheit&current=temperature_2m,weathercode&timezone=auto`
+    );
+    const data = await res.json();
+    const codes = {0:"☀️",1:"🌤",2:"⛅",3:"☁️",45:"🌫",48:"🌫",51:"🌦",61:"🌧",71:"❄️",80:"🌧",95:"⛈"};
+    const temp = Math.round(data.current.temperature_2m);
+    const icon = codes[data.current.weathercode] || "";
+    document.getElementById("weather").textContent = `${icon} ${temp}°F in Centennial`;
+  } catch {
+    document.getElementById("weather").textContent = "Weather unavailable";
+  }
+}
+loadWeather();
+setInterval(loadWeather, 900000);
 
-    async function loadCalendar() {
-      try {
-        const res = await fetch(ICS_URL);
-        if (!res.ok) throw new Error("Fetch failed");
-        const text = await res.text();
-        const events = parseICS(text);
-        renderMeetings(events);
-      } catch (err) {
-        document.getElementById("meetings").innerHTML = "<p>Unable to load calendar</p>";
-        console.error(err);
-      }
-    }
+/* ---------- CALENDAR STATUS ---------- */
+async function loadICS() {
+  try {
+    const res = await fetch(ICS_URL);
+    const text = await res.text();
+    const events = parseICS(text);
+    updateStatus(events);
+  } catch {
+    document.getElementById("status").textContent = "Unable to load calendar";
+  }
+}
 
-    function parseDate(line) {
-      const match = line.match(/(\d{8}T\d{6})(Z)?$/);
-      if (!match) return null;
-      const dateStr = match[1];
-      const isUtc = !!match[2];
-      const year = dateStr.substr(0, 4),
-            mon = dateStr.substr(4, 2),
-            day = dateStr.substr(6, 2),
-            hour = dateStr.substr(9, 2),
-            min = dateStr.substr(11, 2),
-            sec = dateStr.substr(13, 2);
-      const isoStr = `${year}-${mon}-${day}T${hour}:${min}:${sec}${isUtc ? "Z" : ""}`;
-      return new Date(isoStr);
-    }
+function parseDate(line) {
+  const match = line.match(/(\d{8}T\d{6})(Z)?$/);
+  if (!match) return null;
+  const dateStr = match[1];
+  const isUtc = !!match[2];
+  const year = dateStr.substr(0, 4),
+        mon = dateStr.substr(4, 2),
+        day = dateStr.substr(6, 2),
+        hour = dateStr.substr(9, 2),
+        min = dateStr.substr(11, 2),
+        sec = dateStr.substr(13, 2);
+  const iso = `${year}-${mon}-${day}T${hour}:${min}:${sec}${isUtc ? "Z" : ""}`;
+  return new Date(iso);
+}
 
-    function parseICS(text) {
-      const lines = text.split(/\r?\n/);
-      const events = [];
-      let current = {};
-      for (let line of lines) {
-        if (line.startsWith("BEGIN:VEVENT")) current = {};
-        else if (line.startsWith("END:VEVENT")) events.push(current);
-        else if (line.startsWith("DTSTART")) current.start = parseDate(line);
-        else if (line.startsWith("DTEND")) current.end = parseDate(line);
-        else if (line.startsWith("SUMMARY")) current.summary = line.split(":")[1] || "";
-        else if (line.startsWith("DESCRIPTION")) current.desc = line.split(":")[1] || "";
-      }
-      return events;
-    }
+function parseICS(text) {
+  const lines = text.split(/\r?\n/);
+  const events = [];
+  let current = {};
+  for (const line of lines) {
+    if (line.startsWith("BEGIN:VEVENT")) current = {};
+    else if (line.startsWith("END:VEVENT")) events.push(current);
+    else if (line.startsWith("DTSTART")) current.start = parseDate(line);
+    else if (line.startsWith("DTEND")) current.end = parseDate(line);
+    else if (line.startsWith("SUMMARY")) current.summary = line.split(":")[1] || "";
+  }
+  return events;
+}
 
-    function renderMeetings(events) {
-      const now = new Date();
-      const upcoming = events.filter(e => e.end > now).sort((a,b) => a.start - b.start);
-      const nextTwo = upcoming.slice(0, 2);
+function updateStatus(events) {
+  const now = new Date();
+  const today = events.filter(e => e.start && e.start.toDateString() === now.toDateString());
+  const current = today.find(e => now >= e.start && now < e.end);
+  const statusEl = document.getElementById("status");
 
-      const statusEl = document.getElementById("status");
-      const current = upcoming.find(e => e.start <= now && e.end > now);
-      if (current) {
-        statusEl.textContent = `In Use (${formatTime(current.start)} – ${formatTime(current.end)})`;
-        statusEl.className = "status busy";
-      } else {
-        statusEl.textContent = "Available";
-        statusEl.className = "status available";
-      }
+  if (current) {
+    statusEl.textContent = `🔴 In Use – ${current.summary || "Meeting"} until ${formatTime(current.end)}`;
+    statusEl.className = "busy";
+  } else {
+    const next = today.find(e => e.start > now);
+    statusEl.textContent = next
+      ? `🟢 Available until ${formatTime(next.start)}`
+      : "🟢 Available all day";
+    statusEl.className = "available";
+  }
+}
 
-      let html = "";
-      for (let e of nextTwo) {
-        html += `
-          <div class="meeting">
-            <time>${formatTime(e.start)} – ${formatTime(e.end)}</time>
-            <h3>${e.summary || "Untitled Meeting"}</h3>
-          </div>
-        `;
-      }
-      document.getElementById("meetings").innerHTML = html || "<p>No upcoming meetings</p>";
-    }
+function formatTime(date) {
+  return date ? date.toLocaleTimeString([], {hour: "numeric", minute: "2-digit"}) : "";
+}
 
-    function formatTime(date) {
-      return date ? date.toLocaleTimeString([], {hour: "2-digit", minute: "2-digit"}) : "";
-    }
-
-    loadCalendar();
-    setInterval(loadCalendar, 120000); // refresh every 2 minutes
-  </script>
+loadICS();
+setInterval(loadICS, 120000);
+</script>
 </body>
 </html>
