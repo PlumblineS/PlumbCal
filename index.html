@@ -9,10 +9,11 @@
       margin: 0;
       padding: 0;
       font-family: "Segoe UI", sans-serif;
+      background: #000;
       color: #fff;
       overflow: hidden;
-      background: #000;
     }
+
     .background {
       position: fixed;
       inset: 0;
@@ -20,321 +21,236 @@
       background-position: center;
       transition: opacity 2s ease-in-out;
     }
+
     .fade {
       opacity: 0;
     }
+
     header {
       position: absolute;
-      top: 10px;
+      top: 20px;
       left: 30px;
       right: 30px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      z-index: 3;
+      z-index: 2;
     }
+
     header h1 {
       font-size: 1.6rem;
       font-weight: 600;
-      color: #ffd600;
-      text-shadow: 0 0 8px rgba(0,0,0,0.6);
+      color: #00539f;
+      text-shadow: 0 0 8px rgba(0,0,0,0.4);
     }
+
     #logo {
-      max-height: 60px;
+      max-width: 170px;
+      height: auto;
+      opacity: 0.95;
     }
+
     main {
-      display: flex;
-      flex-direction: row;
-      height: 100vh;
       position: relative;
       z-index: 2;
+      padding: 120px 30px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
     }
+
     .left {
-      flex: 0 0 30%;
-      padding: 100px 30px 30px;
+      flex: 1;
     }
+
     .clock {
       font-size: 4rem;
       font-weight: 600;
     }
+
     .date {
       font-size: 1.2rem;
+      margin-bottom: 20px;
       color: #f7b500;
     }
+
     #status {
-      font-size: 1.1rem;
+      font-size: 1.3rem;
       font-weight: 500;
-      margin: 20px 0;
+      margin: 10px 0 25px;
     }
+
     #status.available { color: #00c853; }
     #status.busy { color: #e53935; }
+
     .weather {
       font-size: 1rem;
-      position: absolute;
-      bottom: 20px;
-      left: 30px;
     }
+
     .temp {
       font-size: 2rem;
       font-weight: 600;
     }
+
     .forecast {
       display: flex;
       gap: 12px;
-      margin-top: 8px;
-      font-size: .85rem;
+      margin-top: 12px;
+      font-size: 0.85rem;
     }
-    .forecast div { text-align: center; }
-    .right {
-      flex: 1;
-      padding: 100px 30px 30px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-    .calendar {
-      width: 90%;
-      max-width: 900px;
-      background: rgba(0, 0, 0, 0.5);
-      border-radius: 12px;
-      padding: 20px;
-    }
-    .cal-header {
-      font-size: 1.4rem;
-      font-weight: 600;
-      color: #f7b500;
+
+    .forecast div {
       text-align: center;
-      margin-bottom: 10px;
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      grid-auto-rows: 100px;
-      gap: 4px;
-    }
-    .day {
-      background: rgba(255, 255, 255, 0.08);
-      border-radius: 6px;
-      padding: 6px;
-      position: relative;
-    }
-    .today {
-      outline: 2px solid #f7b500;
-    }
-    .date-num {
-      font-size: .9rem;
-      opacity: .9;
-    }
-    .event {
-      position: absolute;
-      left: 4px;
-      right: 4px;
-      height: 12px;
-      border-radius: 3px;
-      background: #00539f;
-      opacity: 0.85;
-      margin-top: 4px;
-    }
-    .event:hover::after {
-      content: attr(data-title);
-      position: absolute;
-      bottom: 16px;
-      left: 0;
-      right: 0;
-      background: rgba(0,0,0,0.9);
-      color: #fff;
-      padding: 4px 6px;
-      border-radius: 4px;
-      font-size: .75rem;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
     }
   </style>
 </head>
 <body>
 
-<div id="bg1" class="background"></div>
-<div id="bg2" class="background fade"></div>
+  <div id="bg1" class="background"></div>
+  <div id="bg2" class="background fade"></div>
 
-<header>
-  <h1>Centennial – South Conference Room</h1>
-  <img id="logo" src="https://wg.scene7.com/is/image/wrenchgroup/updated-2023-logo-pl23wi001wg?fmt=png-alpha" alt="Plumbline Logo">
-</header>
+  <header>
+    <h1>Centennial – South Conference Room</h1>
+    <img id="logo" src="https://wg.scene7.com/is/image/wrenchgroup/updated-2023-logo-pl23wi001wg?fmt=png-alpha" alt="Plumbline Logo">
+  </header>
 
-<main>
-  <section class="left">
-    <div class="clock" id="clock">--:--</div>
-    <div class="date" id="date">Loading...</div>
-    <div id="status">Loading schedule...</div>
-    <div class="weather">
-      <div class="temp" id="temp">--°F</div>
-      <div id="conditions"></div>
-      <div class="forecast" id="forecast"></div>
+  <main>
+    <div class="left">
+      <div class="clock" id="clock">--:--</div>
+      <div class="date" id="date">Loading...</div>
+      <div id="status">Loading schedule...</div>
+      <div class="weather" id="weather">
+        <div class="temp" id="temp">--°F</div>
+        <div id="conditions"></div>
+        <div class="forecast" id="forecast"></div>
+      </div>
     </div>
-  </section>
+  </main>
 
-  <section class="right">
-    <div class="calendar">
-      <div class="cal-header" id="calHeader">Loading...</div>
-      <div class="grid" id="calendarGrid"></div>
-    </div>
-  </section>
-</main>
+  <script>
+    const IMAGES = [
+      "images/calphoto1.jpg",
+      "images/calphoto2.jpg",
+      "images/calphoto3.jpg",
+      "images/calphoto4.jpg",
+      "images/calphoto5.jpg"
+    ];
 
-<script src="https://cdn.jsdelivr.net/npm/ical.js@1.4.0/build/ical.min.js"></script>
-<script>
-const IMAGES = [
-  "images/calphoto1.jpg",
-  "images/calphoto2.jpg",
-  "images/calphoto3.jpg",
-  "images/calphoto4.jpg",
-  "images/calphoto5.jpg"
-];
+    const ICS_URL = "https://ics-proxy.highdefpants.workers.dev/?url=" + encodeURIComponent(
+      "https://outlook.office365.com/owa/calendar/73ff77286546455d984e75751c99096d@plumblineservices.com/e8f33aaadcfb49e5b0a03df0bdb5e2c58129590484901015770/calendar.ics"
+    );
 
-const ICS_URL = "https://ics-proxy.highdefpants.workers.dev/?ics=https://outlook.office365.com/owa/calendar/73ff77286546455d984e75751c99096d@plumblineservices.com/e8f33aaadcfb49e5b0a03df0bdb5e2c58129590484901015770/calendar.ics";
+    const LAT = 39.5807, LON = -104.8772;
 
-const LAT = 39.5807, LON = -104.8772;
+    // Background rotation
+    let currentBg = 0;
+    const bg1 = document.getElementById("bg1");
+    const bg2 = document.getElementById("bg2");
+    bg1.style.backgroundImage = `url('${IMAGES[0]}')`;
 
-/* -------- Background Image Rotation -------- */
-let current = 0;
-const bg1 = document.getElementById("bg1");
-const bg2 = document.getElementById("bg2");
-bg1.style.backgroundImage = `url('${IMAGES[0]}')`;
+    setInterval(() => {
+      const next = (currentBg + 1) % IMAGES.length;
+      const front = currentBg % 2 ? bg2 : bg1;
+      const back = currentBg % 2 ? bg1 : bg2;
+      back.style.backgroundImage = `url('${IMAGES[next]}')`;
+      front.classList.add("fade");
+      back.classList.remove("fade");
+      currentBg = next;
+    }, 15000);
 
-setInterval(() => {
-  const next = (current + 1) % IMAGES.length;
-  const front = current % 2 ? bg2 : bg1;
-  const back = current % 2 ? bg1 : bg2;
-  back.style.backgroundImage = `url('${IMAGES[next]}')`;
-  front.classList.add("fade");
-  back.classList.remove("fade");
-  current = next;
-}, 15000);
+    // Clock
+    function updateClock() {
+      const now = new Date();
+      document.getElementById("clock").textContent =
+        now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+      document.getElementById("date").textContent =
+        now.toLocaleDateString([], { weekday: "long", month: "long", day: "numeric" });
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
 
-/* -------- Clock & Date -------- */
-function updateClock() {
-  const now = new Date();
-  document.getElementById("clock").textContent = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-  document.getElementById("date").textContent = now.toLocaleDateString([], {weekday:'long', month:'long', day:'numeric'});
-}
-updateClock();
-setInterval(updateClock, 1000);
-
-/* -------- Weather -------- */
-async function loadWeather() {
-  const url = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&temperature_unit=fahrenheit&current=temperature_2m,weathercode&daily=temperature_2m_max,temperature_2m_min,weathercode&forecast_days=4&timezone=auto`;
-  const res = await fetch(url);
-  const data = await res.json();
-  const codes = {0:"☀️",1:"🌤",2:"⛅",3:"☁️",45:"🌫",48:"🌫",51:"🌦",61:"🌧",71:"❄️",80:"🌧",95:"⛈"};
-  document.getElementById("temp").textContent = Math.round(data.current.temperature_2m)+"°F";
-  document.getElementById("conditions").textContent = codes[data.current.weathercode] || "";
-  const fc = document.getElementById("forecast"); fc.innerHTML = "";
-  for(let i=1;i<data.daily.time.length;i++){
-    const d = new Date(data.daily.time[i]);
-    fc.innerHTML += `<div>${["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][d.getDay()]}<br>${codes[data.daily.weathercode[i]]||""}<br><small>${Math.round(data.daily.temperature_2m_max[i])}°/${Math.round(data.daily.temperature_2m_min[i])}°</small></div>`;
-  }
-}
-loadWeather(); setInterval(loadWeather, 1800000);
-
-/* -------- Calendar -------- */
-async function loadCalendar() {
-  const res = await fetch(ICS_URL);
-  const icsText = await res.text();
-  const jcalData = ICAL.parse(icsText);
-  const comp = new ICAL.Component(jcalData);
-  const vevents = comp.getAllSubcomponents("vevent");
-  const now = new Date();
-  const events = [];
-  const end = new Date(now);
-  end.setDate(end.getDate() + 30);
-  const range = new ICAL.Period({
-    start: ICAL.Time.fromJSDate(now),
-    end: ICAL.Time.fromJSDate(end)
-  });
-
-  vevents.forEach(vevent => {
-    const event = new ICAL.Event(vevent);
-    const expand = event.isRecurring() ? event.iterator() : null;
-    if (expand) {
-      let next;
-      while ((next = expand.next())) {
-        const dt = next.toJSDate();
-        if (dt > end) break;
-        const duration = event.endDate.subtractDate(event.startDate).toSeconds();
-        const newEnd = new Date(dt.getTime() + duration * 1000);
-        events.push({ summary: event.summary, start: dt, end: newEnd });
+    // Weather
+    async function loadWeather() {
+      try {
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&temperature_unit=fahrenheit&current=temperature_2m,weathercode&daily=temperature_2m_max,temperature_2m_min,weathercode&forecast_days=4&timezone=auto`;
+        const res = await fetch(url);
+        const data = await res.json();
+        const codes = { 0:"☀️", 1:"🌤", 2:"⛅", 3:"☁️", 45:"🌫", 48:"🌫", 51:"🌦", 61:"🌧", 71:"❄️", 80:"🌧", 95:"⛈" };
+        document.getElementById("temp").textContent = Math.round(data.current.temperature_2m) + "°F";
+        document.getElementById("conditions").textContent = codes[data.current.weathercode] || "";
+        const fc = document.getElementById("forecast");
+        fc.innerHTML = "";
+        for (let i = 1; i < data.daily.time.length; i++) {
+          const d = new Date(data.daily.time[i]);
+          fc.innerHTML += `<div>${["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][d.getDay()]}<br>${codes[data.daily.weathercode[i]] || ""}<br><small>${Math.round(data.daily.temperature_2m_max[i])}°/${Math.round(data.daily.temperature_2m_min[i])}°</small></div>`;
+        }
+      } catch (e) {
+        console.log("Weather error", e);
       }
-    } else {
-      events.push({ summary: event.summary, start: event.startDate.toJSDate(), end: event.endDate.toJSDate() });
     }
-  });
+    loadWeather();
+    setInterval(loadWeather, 1800000);
 
-  renderCalendar(events);
-  updateStatus(events);
-}
+    // ICS calendar status (today only)
+    async function loadICS() {
+      try {
+        const res = await fetch(ICS_URL);
+        const text = await res.text();
+        const unfolded = text.replace(/\r?\n[ \t]/g, "");
+        const lines = unfolded.split(/\r?\n/);
+        const events = [];
+        let current = {};
+        for (const line of lines) {
+          if (line.startsWith("BEGIN:VEVENT")) current = {};
+          else if (line.startsWith("SUMMARY:")) current.summary = line.slice(8).trim();
+          else if (line.startsWith("DTSTART")) current.start = parseDate(line);
+          else if (line.startsWith("DTEND")) current.end = parseDate(line);
+          else if (line.startsWith("END:VEVENT")) events.push(current);
+        }
 
-function renderCalendar(events) {
-  const grid = document.getElementById("calendarGrid");
-  const calHeader = document.getElementById("calHeader");
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth();
-  const firstDay = new Date(year, month, 1).getDay();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-  calHeader.textContent = now.toLocaleDateString([], { month: 'long', year: 'numeric' });
-  grid.innerHTML = "";
-
-  for (let i = 0; i < firstDay; i++) grid.innerHTML += "<div></div>";
-
-  for (let d = 1; d <= daysInMonth; d++) {
-    const cell = document.createElement("div");
-    cell.className = "day";
-    const date = new Date(year, month, d);
-    if (date.toDateString() === now.toDateString()) cell.classList.add("today");
-    cell.innerHTML = `<div class="date-num">${d}</div>`;
-
-    const dayStart = new Date(year, month, d, 0, 0, 0);
-    const dayEnd = new Date(year, month, d, 23, 59, 59);
-    const dayEvents = events.filter(e => e.start < dayEnd && e.end > dayStart);
-    dayEvents.forEach((e, i) => {
-      const el = document.createElement("div");
-      el.className = "event";
-      el.style.top = `${18 + i * 14}px`;
-      el.dataset.title = `${e.summary} (${formatTime(e.start)}–${formatTime(e.end)})`;
-      cell.appendChild(el);
-    });
-
-    grid.appendChild(cell);
-  }
-}
-
-function updateStatus(events) {
-  const now = new Date();
-  const statusEl = document.getElementById("status");
-  const todayEvents = events.filter(e => e.start.toDateString() === now.toDateString());
-  const current = todayEvents.find(e => now >= e.start && now < e.end);
-  if (current) {
-    statusEl.textContent = `🔴 In Use – ${current.summary} until ${formatTime(current.end)}`;
-    statusEl.className = "busy";
-  } else {
-    const next = todayEvents.find(e => e.start > now);
-    if (next) {
-      statusEl.textContent = `🟢 Available until ${formatTime(next.start)} – Next: ${next.summary}`;
-    } else {
-      statusEl.textContent = `🟢 Available all day`;
+        updateStatus(events);
+      } catch (e) {
+        document.getElementById("status").textContent = "Unable to load schedule";
+        console.error("ICS error", e);
+      }
     }
-    statusEl.className = "available";
-  }
-}
 
-function formatTime(d) {
-  return d ? d.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'}) : "";
-}
+    function parseDate(line) {
+      const match = line.match(/(\d{8}T\d{6})(Z)?$/);
+      if (!match) return null;
+      const dateStr = match[1];
+      const isUtc = !!match[2];
+      const year = dateStr.substr(0, 4),
+            mon = dateStr.substr(4, 2),
+            day = dateStr.substr(6, 2),
+            hour = dateStr.substr(9, 2),
+            min = dateStr.substr(11, 2),
+            sec = dateStr.substr(13, 2);
+      const iso = `${year}-${mon}-${day}T${hour}:${min}:${sec}${isUtc ? "Z" : ""}`;
+      return new Date(iso);
+    }
 
-loadCalendar();
-setInterval(loadCalendar, 120000);
-</script>
+    function updateStatus(events) {
+      const now = new Date();
+      const todayEvents = events.filter(e => e.start && e.start.toDateString() === now.toDateString());
+      const ongoing = todayEvents.find(e => now >= e.start && now < e.end);
+      const statusEl = document.getElementById("status");
+      if (ongoing) {
+        statusEl.textContent = "🔴 In Use – " + (ongoing.summary || "Meeting") + " until " + formatTime(ongoing.end);
+        statusEl.className = "busy";
+      } else {
+        const next = todayEvents.find(e => e.start > now);
+        statusEl.textContent = next ? "🟢 Available until " + formatTime(next.start) : "🟢 Available all day";
+        statusEl.className = "available";
+      }
+    }
+
+    function formatTime(d) {
+      return d ? d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }) : "";
+    }
+
+    loadICS();
+    setInterval(loadICS, 120000);
+  </script>
 </body>
 </html>
