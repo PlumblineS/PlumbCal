@@ -210,7 +210,6 @@
             const hour = parseInt(time.slice(0, 2));
             const minute = parseInt(time.slice(2, 4));
 
-            // Handle UTC timestamps
             if (str.endsWith("Z")) {
               return new Date(Date.UTC(year, month, day, hour, minute));
             } else {
@@ -290,11 +289,11 @@
 
       /* ---------- BACKGROUND ROTATION ---------- */
       const backgroundImages = [
-        "calphoto1.jpg",
-        "calphoto2.jpg",
-        "calphoto3.jpg",
-        "calphoto4.jpg",
-        "calphoto5.jpg"
+        "images/calphoto1.jpg",
+        "images/calphoto2.jpg",
+        "images/calphoto3.jpg",
+        "images/calphoto4.jpg",
+        "images/calphoto5.jpg"
       ];
 
       let bgIndex = 0;
