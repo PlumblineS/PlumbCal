@@ -2,79 +2,69 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Plumbline South Conference Room</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Centennial – South Conference Room</title>
     <style>
       body {
+        margin: 0;
         font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
         color: white;
         text-align: center;
-        margin: 0;
-        padding: 0;
-        height: 100vh;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
         background-size: cover;
         background-position: center;
-        background-repeat: no-repeat;
         transition: background-image 1s ease-in-out;
       }
 
       header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
         padding: 20px;
       }
 
+      #room-name {
+        font-size: 1.5em;
+        font-weight: bold;
+        color: yellow;
+      }
+
       #logo {
-        max-width: 280px;
-        height: auto;
+        height: 50px;
       }
 
       #time {
-        font-size: 3.5em;
+        font-size: 4em;
         font-weight: bold;
         margin-top: 10px;
       }
 
       #date {
-        font-size: 1.4em;
-        margin-top: 5px;
-        opacity: 0.9;
-      }
-
-      main {
-        flex-grow: 1;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
+        font-size: 1.5em;
+        margin-bottom: 20px;
       }
 
       #status {
-        font-size: 2.3em;
+        font-size: 2em;
         font-weight: bold;
-        margin-bottom: 15px;
+        margin: 20px 0 10px;
       }
 
       #next {
-        font-size: 1.4em;
-        opacity: 0.9;
-      }
-
-      footer {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-end;
-        padding: 20px;
+        font-size: 1.2em;
+        opacity: 0.95;
       }
 
       #weather {
+        position: absolute;
+        bottom: 20px;
+        left: 20px;
         text-align: left;
-        font-size: 1.2em;
+        font-size: 1em;
       }
 
       .forecast {
         display: flex;
-        gap: 12px;
+        gap: 10px;
         margin-top: 8px;
       }
 
@@ -82,212 +72,57 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        font-size: 0.9em;
       }
 
       .day img {
-        width: 40px;
-        height: 40px;
+        width: 32px;
+        height: 32px;
       }
 
       #updated {
+        position: absolute;
+        bottom: 10px;
+        right: 20px;
         font-size: 0.8em;
         opacity: 0.7;
-        text-align: right;
       }
     </style>
   </head>
-
   <body>
     <header>
-      <img
-        id="logo"
-        src="https://upload.wikimedia.org/wikipedia/commons/3/3a/Plumbline_Services_logo.png"
-        alt="Plumbline Logo"
-      />
-      <div id="time"></div>
-      <div id="date"></div>
+      <div id="room-name">Centennial – South Conference Room</div>
+      <img id="logo" src="https://wg.scene7.com/is/image/wrenchgroup/updated-2023-logo-pl23wi001wg?fmt=png-alpha" alt="Plumbline Logo" />
     </header>
 
-    <main>
-      <div id="status">Loading schedule...</div>
-      <div id="next"></div>
-    </main>
+    <div id="time"></div>
+    <div id="date"></div>
+    <div id="status">Loading status...</div>
+    <div id="next"></div>
 
-    <footer>
-      <div id="weather">
-        <div id="current"></div>
-        <div class="forecast" id="forecast"></div>
-      </div>
-      <div id="updated"></div>
-    </footer>
+    <div id="weather">
+      <div id="current"></div>
+      <div class="forecast" id="forecast"></div>
+    </div>
+    <div id="updated"></div>
 
     <script>
-      /* ---------- CLOCK ---------- */
+      // ---------- TIME ----------
       function updateTime() {
         const now = new Date();
-        document.getElementById("time").textContent = now.toLocaleTimeString(
-          "en-US",
-          { hour: "2-digit", minute: "2-digit" }
-        );
-        document.getElementById("date").textContent = now.toLocaleDateString(
-          "en-US",
-          { weekday: "long", month: "long", day: "numeric" }
-        );
+        document.getElementById("time").textContent = now.toLocaleTimeString("en-US", {
+          hour: "2-digit",
+          minute: "2-digit"
+        });
+        document.getElementById("date").textContent = now.toLocaleDateString("en-US", {
+          weekday: "long",
+          month: "long",
+          day: "numeric"
+        });
       }
       setInterval(updateTime, 1000);
       updateTime();
 
-      /* ---------- CALENDAR ---------- */
-      const ICS_URL =
-        "https://ics-proxy.highdefpants.workers.dev/?url=" +
-        encodeURIComponent(
-          "https://outlook.office365.com/owa/calendar/73ff77286546455d984e75751c99096d@plumblineservices.com/e8f33aaadcfb49e5b0a03df0bdb5e2c58129590484901015770/calendar.ics"
-        );
-
-      async function loadCalendar() {
-        try {
-          const response = await fetch(ICS_URL, { cache: "no-store" });
-          if (!response.ok) throw new Error("Calendar fetch failed");
-          const icsText = await response.text();
-
-          const events = [];
-          const rawEvents = icsText.split("BEGIN:VEVENT").slice(1);
-          for (let block of rawEvents) {
-            const summaryMatch = block.match(/SUMMARY:(.+)/);
-            const startMatch = block.match(/DTSTART[^:]*:(.+)/);
-            const endMatch = block.match(/DTEND[^:]*:(.+)/);
-            if (summaryMatch && startMatch && endMatch) {
-              const summary = summaryMatch[1].replace(/\\n/g, " ").trim();
-              const start = parseICSDate(startMatch[1]);
-              const end = parseICSDate(endMatch[1]);
-              if (start && end) events.push({ summary, start, end });
-            }
-          }
-
-          const now = new Date();
-          const current = events.find(
-            (e) => now >= e.start && now <= e.end
-          );
-          const next = events
-            .filter((e) => e.start > now)
-            .sort((a, b) => a.start - b.start)[0];
-
-          const statusEl = document.getElementById("status");
-          const nextEl = document.getElementById("next");
-
-          if (current) {
-            statusEl.textContent = "🔴 In Use";
-            nextEl.textContent = `${current.summary} until ${formatTime(
-              current.end
-            )}`;
-          } else if (next) {
-            statusEl.textContent = "🟢 Available";
-            nextEl.textContent = `Until ${formatTime(next.start)} – Next: ${
-              next.summary
-            }`;
-          } else {
-            statusEl.textContent = "🟢 Available all day";
-            nextEl.textContent = "";
-          }
-
-          document.getElementById("updated").textContent =
-            "Updated " + new Date().toLocaleTimeString();
-        } catch (err) {
-          console.error("Calendar error:", err);
-          document.getElementById("status").textContent =
-            "Error loading schedule (check console)";
-        }
-      }
-
-      function parseICSDate(str) {
-        try {
-          if (str.includes("T")) {
-            const [date, time] = str.split("T");
-            const year = parseInt(date.slice(0, 4));
-            const month = parseInt(date.slice(4, 6)) - 1;
-            const day = parseInt(date.slice(6, 8));
-            const hour = parseInt(time.slice(0, 2));
-            const minute = parseInt(time.slice(2, 4));
-
-            if (str.endsWith("Z")) {
-              return new Date(Date.UTC(year, month, day, hour, minute));
-            } else {
-              return new Date(year, month, day, hour, minute);
-            }
-          } else {
-            const year = parseInt(str.slice(0, 4));
-            const month = parseInt(str.slice(4, 6)) - 1;
-            const day = parseInt(str.slice(6, 8));
-            return new Date(year, month, day);
-          }
-        } catch {
-          return null;
-        }
-      }
-
-      function formatTime(date) {
-        return date.toLocaleTimeString("en-US", {
-          hour: "2-digit",
-          minute: "2-digit",
-        });
-      }
-
-      loadCalendar();
-      setInterval(loadCalendar, 120000);
-
-      /* ---------- WEATHER ---------- */
-      const WEATHER_URL =
-        "https://api.open-meteo.com/v1/forecast?latitude=39.58&longitude=-104.83&current=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min,weather_code&timezone=auto&temperature_unit=fahrenheit";
-
-      async function loadWeather() {
-        try {
-          const res = await fetch(WEATHER_URL);
-          const data = await res.json();
-
-          const currentTemp = Math.round(data.current.temperature_2m);
-          const currentIcon = iconForWeather(data.current.weather_code);
-
-          document.getElementById(
-            "current"
-          ).innerHTML = `<img src="${currentIcon}" alt="Weather"> ${currentTemp}°F`;
-
-          const forecastDiv = document.getElementById("forecast");
-          forecastDiv.innerHTML = "";
-          for (let i = 1; i <= 3; i++) {
-            const dayName = new Date(data.daily.time[i]).toLocaleDateString(
-              "en-US",
-              { weekday: "short" }
-            );
-            const icon = iconForWeather(data.daily.weather_code[i]);
-            const max = Math.round(data.daily.temperature_2m_max[i]);
-            forecastDiv.innerHTML += `<div class="day"><div>${dayName}</div><img src="${icon}" alt="Forecast"><div>${max}°</div></div>`;
-          }
-        } catch (err) {
-          console.error("Weather error:", err);
-        }
-      }
-
-      function iconForWeather(code) {
-        if ([0, 1].includes(code))
-          return "https://openweathermap.org/img/wn/01d.png";
-        if ([2, 3].includes(code))
-          return "https://openweathermap.org/img/wn/02d.png";
-        if ([45, 48].includes(code))
-          return "https://openweathermap.org/img/wn/50d.png";
-        if ([51, 53, 55, 61, 63, 65].includes(code))
-          return "https://openweathermap.org/img/wn/09d.png";
-        if ([71, 73, 75].includes(code))
-          return "https://openweathermap.org/img/wn/13d.png";
-        if ([95, 96, 99].includes(code))
-          return "https://openweathermap.org/img/wn/11d.png";
-        return "https://openweathermap.org/img/wn/04d.png";
-      }
-
-      loadWeather();
-      setInterval(loadWeather, 600000);
-
-      /* ---------- BACKGROUND ROTATION ---------- */
+      // ---------- BACKGROUND ROTATION ----------
       const backgroundImages = [
         "images/calphoto1.jpg",
         "images/calphoto2.jpg",
@@ -295,16 +130,130 @@
         "images/calphoto4.jpg",
         "images/calphoto5.jpg"
       ];
-
-      let bgIndex = 0;
-
+      let currentBackground = 0;
       function rotateBackground() {
-        document.body.style.backgroundImage = `url('${backgroundImages[bgIndex]}')`;
-        bgIndex = (bgIndex + 1) % backgroundImages.length;
+        document.body.style.backgroundImage = `url(${backgroundImages[currentBackground]})`;
+        currentBackground = (currentBackground + 1) % backgroundImages.length;
+      }
+      rotateBackground();
+      setInterval(rotateBackground, 10000);
+
+      // ---------- CALENDAR ----------
+      const ICS_URL = "https://ics-proxy.highdefpants.workers.dev/?url=https%3A%2F%2Foutlook.office365.com%2Fowa%2Fcalendar%2F73ff77286546455d984e75751c99096d%40plumblineservices.com%2Fe8f33aaadcfb49e5b0a03df0bdb5e2c58129590484901015770%2Fcalendar.ics";
+
+      async function loadCalendar() {
+        try {
+          const response = await fetch(ICS_URL, { cache: "no-store" });
+          const icsText = await response.text();
+
+          const events = [];
+          const blocks = icsText.split("BEGIN:VEVENT").slice(1);
+          for (let block of blocks) {
+            const summary = (block.match(/SUMMARY:(.+)/) || [])[1];
+            const start = (block.match(/DTSTART[^:]*:(.+)/) || [])[1];
+            const end = (block.match(/DTEND[^:]*:(.+)/) || [])[1];
+
+            if (summary && start && end) {
+              const startDate = parseICSDate(start);
+              const endDate = parseICSDate(end);
+              if (startDate && endDate) {
+                events.push({ summary, start: startDate, end: endDate });
+              }
+            }
+          }
+
+          const now = new Date();
+          const current = events.find(e => now >= e.start && now <= e.end);
+          const next = events.filter(e => e.start > now).sort((a, b) => a.start - b.start)[0];
+
+          const statusEl = document.getElementById("status");
+          const nextEl = document.getElementById("next");
+
+          if (current) {
+            statusEl.innerHTML = "🔴 <span style='color:#ff6666'>In Use</span>";
+            nextEl.textContent = `${current.summary} until ${formatTime(current.end)}`;
+          } else if (next) {
+            statusEl.innerHTML = "🟢 <span style='color:#99ff99'>Available</span>";
+            nextEl.textContent = `Until ${formatTime(next.start)} – Next: ${next.summary}`;
+          } else {
+            statusEl.innerHTML = "🟢 <span style='color:#99ff99'>Available all day</span>";
+            nextEl.textContent = "";
+          }
+
+          document.getElementById("updated").textContent = "Updated " + now.toLocaleTimeString();
+        } catch (err) {
+          console.error("Calendar error:", err);
+          document.getElementById("status").textContent = "Error loading calendar.";
+        }
       }
 
-      rotateBackground();
-      setInterval(rotateBackground, 10000); // every 10 seconds
+      function parseICSDate(str) {
+        if (!str) return null;
+        const parts = str.split("T");
+        if (parts.length < 2) return null;
+
+        const date = parts[0];
+        const time = parts[1].replace("Z", "");
+        const year = +date.slice(0, 4);
+        const month = +date.slice(4, 6) - 1;
+        const day = +date.slice(6, 8);
+        const hour = +time.slice(0, 2);
+        const minute = +time.slice(2, 4);
+
+        return new Date(year, month, day, hour, minute);
+      }
+
+      function formatTime(date) {
+        return date.toLocaleTimeString("en-US", {
+          hour: "2-digit",
+          minute: "2-digit"
+        });
+      }
+
+      loadCalendar();
+      setInterval(loadCalendar, 120000);
+
+      // ---------- WEATHER ----------
+      const WEATHER_URL =
+        "https://api.open-meteo.com/v1/forecast?latitude=39.58&longitude=-104.83&current=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min,weather_code&timezone=auto";
+
+      async function loadWeather() {
+        try {
+          const res = await fetch(WEATHER_URL);
+          const data = await res.json();
+
+          const currentTemp = Math.round(data.current.temperature_2m);
+          const icon = iconForWeather(data.current.weather_code);
+
+          document.getElementById("current").innerHTML = `<img src="${icon}" alt=""> ${data.current_units.temperature_2m || "°F"} ${currentTemp}°`;
+
+          const forecastDiv = document.getElementById("forecast");
+          forecastDiv.innerHTML = "";
+
+          for (let i = 1; i <= 3; i++) {
+            const day = new Date(data.daily.time[i]).toLocaleDateString("en-US", { weekday: "short" });
+            const icon = iconForWeather(data.daily.weather_code[i]);
+            const max = Math.round(data.daily.temperature_2m_max[i]);
+
+            forecastDiv.innerHTML += `<div class="day"><div>${day}</div><img src="${icon}" alt=""><div>${max}°</div></div>`;
+          }
+        } catch (err) {
+          console.error("Weather error:", err);
+        }
+      }
+
+      function iconForWeather(code) {
+        if ([0, 1].includes(code)) return "https://openweathermap.org/img/wn/01d.png";
+        if ([2, 3].includes(code)) return "https://openweathermap.org/img/wn/02d.png";
+        if ([45, 48].includes(code)) return "https://openweathermap.org/img/wn/50d.png";
+        if ([51, 53, 55, 61, 63, 65].includes(code)) return "https://openweathermap.org/img/wn/09d.png";
+        if ([71, 73, 75].includes(code)) return "https://openweathermap.org/img/wn/13d.png";
+        if ([95, 96, 99].includes(code)) return "https://openweathermap.org/img/wn/11d.png";
+        return "https://openweathermap.org/img/wn/04d.png";
+      }
+
+      loadWeather();
+      setInterval(loadWeather, 600000); // every 10 minutes
     </script>
   </body>
 </html>
