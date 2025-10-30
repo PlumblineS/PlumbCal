@@ -137,7 +137,7 @@
 
       /* ---------- CALENDAR ---------- */
       const ICS_URL =
-        "https://corsproxy.io/?" +
+        "https://ics-proxy.highdefpants.workers.dev/?url=" +
         encodeURIComponent(
           "https://outlook.office365.com/owa/calendar/73ff77286546455d984e75751c99096d@plumblineservices.com/e8f33aaadcfb49e5b0a03df0bdb5e2c58129590484901015770/calendar.ics"
         );
@@ -147,7 +147,6 @@
           const response = await fetch(ICS_URL, { cache: "no-store" });
           if (!response.ok) throw new Error("Calendar fetch failed");
           const icsText = await response.text();
-          console.log("ICS length:", icsText.length);
 
           const events = [];
           const rawEvents = icsText.split("BEGIN:VEVENT").slice(1);
@@ -231,7 +230,7 @@
 
       /* ---------- WEATHER ---------- */
       const WEATHER_URL =
-        "https://api.open-meteo.com/v1/forecast?latitude=39.58&longitude=-104.83&current=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min,weather_code&timezone=auto";
+        "https://api.open-meteo.com/v1/forecast?latitude=39.58&longitude=-104.83&current=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min,weather_code&timezone=auto&temperature_unit=fahrenheit";
 
       async function loadWeather() {
         try {
@@ -243,7 +242,7 @@
 
           document.getElementById(
             "current"
-          ).innerHTML = `<img src="${currentIcon}" alt=""> ${currentTemp}°F`;
+          ).innerHTML = `<img src="${currentIcon}" alt="Weather"> ${currentTemp}°F`;
 
           const forecastDiv = document.getElementById("forecast");
           forecastDiv.innerHTML = "";
@@ -254,7 +253,7 @@
             );
             const icon = iconForWeather(data.daily.weather_code[i]);
             const max = Math.round(data.daily.temperature_2m_max[i]);
-            forecastDiv.innerHTML += `<div class="day"><div>${dayName}</div><img src="${icon}" alt=""><div>${max}°</div></div>`;
+            forecastDiv.innerHTML += `<div class="day"><div>${dayName}</div><img src="${icon}" alt="Forecast"><div>${max}°</div></div>`;
           }
         } catch (err) {
           console.error("Weather error:", err);
