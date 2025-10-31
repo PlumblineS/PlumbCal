@@ -216,6 +216,8 @@
       try {
         const res = await fetch(ICS_URL);
         const text = await res.text();
+        console.log("ICS data received, length:", text.length);
+        
         const unfolded = text.replace(/\r?\n[ \t]/g, "");
         const lines = unfolded.split(/\r?\n/);
         const events = [];
@@ -232,9 +234,11 @@
             current.end = parseDate(line);
           } else if (line.startsWith("RRULE:")) {
             current.rrule = line.slice(6).trim();
+            console.log("Found recurring event:", current.summary, "RRULE:", current.rrule);
           } else if (line.startsWith("END:VEVENT")) {
             // If it's a recurring event, expand it for today
             if (current.rrule && current.start) {
+              console.log("Expanding recurring event:", current.summary);
               expandRecurringEvent(current, events);
             } else {
               events.push(current);
@@ -242,6 +246,8 @@
           }
         }
 
+        console.log("Total events parsed:", events.length);
+        console.log("Events:", events);
         updateDisplay(events);
       } catch (e) {
         document.getElementById("status-message").textContent = "Unable to load schedule";
