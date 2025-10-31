@@ -49,32 +49,32 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 30px;
-      padding: 30px 40px;
+      padding: 20px 40px;
       height: calc(100vh - 80px);
-      align-items: center;
     }
 
-    /* Left Column - Status */
+    /* Left Column - Clock centered higher */
     .left-column {
       display: flex;
       flex-direction: column;
-      justify-content: center;
+      justify-content: flex-start;
       align-items: center;
+      padding-top: 60px;
     }
 
     .clock {
-      font-size: 5.5rem;
+      font-size: 6rem;
       font-weight: 200;
       letter-spacing: -2px;
       margin-bottom: 10px;
     }
 
     .date {
-      font-size: 1.4rem;
+      font-size: 1.5rem;
       font-weight: 300;
       color: #b8c5d6;
       letter-spacing: 1px;
-      margin-bottom: 40px;
+      margin-bottom: 50px;
     }
 
     .status-display {
@@ -82,14 +82,13 @@
       backdrop-filter: blur(20px);
       border: 1px solid rgba(255, 255, 255, 0.15);
       border-radius: 20px;
-      padding: 40px 50px;
+      padding: 30px 40px;
       text-align: center;
       width: 100%;
-      max-width: 500px;
     }
 
     #status {
-      font-size: 2.2rem;
+      font-size: 2rem;
       font-weight: 400;
       display: flex;
       align-items: center;
@@ -116,13 +115,12 @@
       box-shadow: 0 0 20px rgba(239, 83, 80, 0.5);
     }
 
-    /* Right Column - Meetings & Weather */
+    /* Right Column - Status & Meetings */
     .right-column {
       display: flex;
       flex-direction: column;
-      gap: 25px;
-      max-height: 100%;
-      overflow-y: auto;
+      gap: 20px;
+      padding-top: 20px;
     }
 
     .section-card {
@@ -233,29 +231,13 @@
   </header>
 
   <div class="main-grid">
-    <!-- Left: Clock & Status -->
+    <!-- Left: Clock & Weather -->
     <div class="left-column">
       <div class="clock" id="clock">--:--</div>
       <div class="date" id="date">Loading...</div>
       
-      <div class="status-display">
-        <div id="status">
-          <span class="status-icon available" id="status-icon"></span>
-          <span id="status-text">Loading schedule...</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Right: Meetings & Weather -->
-    <div class="right-column">
-      <!-- Upcoming Meetings -->
-      <div class="section-card">
-        <div class="section-title">Today's Schedule</div>
-        <div id="upcoming"></div>
-      </div>
-
       <!-- Weather -->
-      <div class="section-card">
+      <div class="section-card" style="margin-top: 40px;">
         <div class="section-title">Weather</div>
         <div class="weather-content">
           <div class="current-weather">
@@ -264,6 +246,23 @@
           </div>
           <div class="forecast" id="forecast"></div>
         </div>
+      </div>
+    </div>
+
+    <!-- Right: Status & Meetings -->
+    <div class="right-column">
+      <!-- Availability Status -->
+      <div class="status-display">
+        <div id="status">
+          <span class="status-icon available" id="status-icon"></span>
+          <span id="status-text">Loading schedule...</span>
+        </div>
+      </div>
+
+      <!-- Upcoming Meetings -->
+      <div class="section-card">
+        <div class="section-title">Today's Schedule</div>
+        <div id="upcoming"></div>
       </div>
     </div>
   </div>
