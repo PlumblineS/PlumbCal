@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="icon" href="data:,">
+  <title>Centennial – Main Conference Room</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #1e3a8a;
+      color: #fff;
+      overflow: hidden;
+      width: 100%;
+      height: 100vh;
+    }
+
+    .container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      height: 100vh;
+    }
+
+    /* Left Panel */
+    .left-panel {
+      background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+      display: flex;
+      flex-direction: column;
+      padding: 40px;
+      position: relative;
+    }
+
+    .logo-section {
+      margin-bottom: 60px;
+    }
+
+    #logo {
+      max-width: 200px;
+      height: auto;
+    }
+
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    .room-name {
+      font-size: 3rem;
+      font-weight: 600;
+      margin-bottom: 20px;
+      line-height: 1.2;
+    }
+
+    .status-message {
+      font-size: 2rem;
+      font-weight: 300;
+      margin-bottom: 80px;
+      line-height: 1.4;
+    }
+
+    .status-message.available {
+      color: #86efac;
+    }
+
+    .status-message.busy {
+      color: #fca5a5;
+    }
+
+    .clock-section {
+      margin-top: auto;
+    }
+
+    .clock {
+      font-size: 5rem;
+      font-weight: 300;
+      letter-spacing: -1px;
+    }
+
+    .date {
+      font-size: 1.3rem;
+      font-weight: 300;
+      opacity: 0.9;
+      margin-top: 5px;
+    }
+
+    /* Right Panel - Schedule */
+    .right-panel {
+      background: #f8fafc;
+      color: #1e293b;
+      padding: 40px;
+      overflow-y: auto;
+    }
+
+    .schedule-header {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #64748b;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .timeline {
+      position: relative;
+    }
+
+    .time-slot {
+      display: flex;
+      align-items: flex-start;
+      min-height: 70px;
+      position: relative;
+      padding-left: 100px;
+    }
+
+    .time-label {
+      position: absolute;
+      left: 0;
+      font-size: 1rem;
+      color: #94a3b8;
+      font-weight: 500;
+      width: 80px;
+    }
+
+    .event-block {
+      background: #3b82f6;
+      color: white;
+      padding: 15px 20px;
+      border-radius: 8px;
+      width: 100%;
+      margin-bottom: 10px;
+      box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+    }
+
+    .event-title {
+      font-size: 1.1rem;
+      font-weight: 500;
+      margin-bottom: 5px;
+    }
+
+    .event-time {
+      font-size: 0.9rem;
+      opacity: 0.9;
+    }
+
+    .no-events {
+      color: #94a3b8;
+      font-style: italic;
+      padding: 20px 0;
+      padding-left: 100px;
+    }
+
+    .empty-slot {
+      height: 70px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- Left Panel -->
+    <div class="left-panel">
+      <div class="logo-section">
+        <img id="logo" src="https://wg.scene7.com/is/image/wrenchgroup/updated-2023-logo-pl23wi001wg?fmt=png-alpha" alt="Plumbline Logo">
+      </div>
+
+      <div class="main-content">
+        <div class="room-name">Centennial – Main Conference Room</div>
+        <div class="status-message available" id="status-message">
+          Free all day
+        </div>
+      </div>
+
+      <div class="clock-section">
+        <div class="clock" id="clock">--:--</div>
+        <div class="date" id="date">Loading...</div>
+      </div>
+    </div>
+
+    <!-- Right Panel - Timeline Schedule -->
+    <div class="right-panel">
+      <div class="schedule-header">Today's Schedule</div>
+      <div class="timeline" id="timeline">
+        <!-- Schedule will be populated here -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const ICS_URL = "https://ics-proxy.highdefpants.workers.dev/?url=" + encodeURIComponent(
+      "https://outlook.office365.com/owa/calendar/7eb5b84a4c254833a6068fefabd3b4f4@plumblineservices.com/2de227a7598142808e9ec14983b7fce79595097556694032856/calendar.ics"
+    );
+
+    // Clock
+    function updateClock() {
+      const now = new Date();
+      document.getElementById("clock").textContent =
+        now.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+      document.getElementById("date").textContent =
+        now.toLocaleDateString([], { weekday: "long", month: "long", day: "numeric", year: "numeric" });
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // ICS calendar status
+    async function loadICS() {
+      try {
+        const res = await fetch(ICS_URL);
+        const text = await res.text();
+        console.log("ICS data received, length:", text.length);
+        
+        const unfolded = text.replace(/\r?\n[ \t]/g, "");
+        const lines = unfolded.split(/\r?\n/);
+        const events = [];
+        let current = {};
+        
+        for (const line of lines) {
+          if (line.startsWith("BEGIN:VEVENT")) {
+            current = {};
+          } else if (line.startsWith("SUMMARY:")) {
+            current.summary = line.slice(8).trim();
+          } else if (line.startsWith("DTSTART")) {
+            current.start = parseDate(line);
+          } else if (line.startsWith("DTEND")) {
+            current.end = parseDate(line);
+          } else if (line.startsWith("RRULE:")) {
+            current.rrule = line.slice(6).trim();
+            console.log("Found recurring event:", current.summary, "RRULE:", current.rrule);
+          } else if (line.startsWith("END:VEVENT")) {
+            // If it's a recurring event, expand it for today
+            if (current.rrule && current.start) {
+              console.log("Expanding recurring event:", current.summary);
+              expandRecurringEvent(current, events);
+            } else {
+              events.push(current);
+            }
+          }
+        }
+
+        console.log("Total events parsed:", events.length);
+        console.log("Events:", events);
+        updateDisplay(events);
+      } catch (e) {
+        document.getElementById("status-message").textContent = "Unable to load schedule";
+        console.error("ICS error", e);
+      }
+    }
+
+    function parseDate(line) {
+      const match = line.match(/(\d{8}T\d{6})(Z)?$/);
+      if (!match) return null;
+      const dateStr = match[1];
+      const isUtc = !!match[2];
+      const year = dateStr.substr(0, 4),
+            mon = dateStr.substr(4, 2),
+            day = dateStr.substr(6, 2),
+            hour = dateStr.substr(9, 2),
+            min = dateStr.substr(11, 2),
+            sec = dateStr.substr(13, 2);
+      const iso = `${year}-${mon}-${day}T${hour}:${min}:${sec}${isUtc ? "Z" : ""}`;
+      return new Date(iso);
+    }
+
+    function expandRecurringEvent(event, events) {
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      
+      // Check if the original event is today
+      if (event.start.toDateString() === today.toDateString()) {
+        events.push(event);
+        return;
+      }
+      
+      // Parse RRULE to check if event occurs today
+      if (event.rrule.includes("FREQ=DAILY")) {
+        // Daily recurrence - create instance for today
+        const duration = event.end - event.start;
+        const todayStart = new Date(today);
+        todayStart.setHours(event.start.getHours(), event.start.getMinutes(), 0, 0);
+        
+        const todayEnd = new Date(todayStart.getTime() + duration);
+        
+        events.push({
+          summary: event.summary,
+          start: todayStart,
+          end: todayEnd
+        });
+      } else if (event.rrule.includes("FREQ=WEEKLY")) {
+        // Weekly recurrence - check if today matches the day of week
+        const eventDay = event.start.getDay();
+        const todayDay = today.getDay();
+        
+        if (eventDay === todayDay) {
+          const duration = event.end - event.start;
+          const todayStart = new Date(today);
+          todayStart.setHours(event.start.getHours(), event.start.getMinutes(), 0, 0);
+          
+          const todayEnd = new Date(todayStart.getTime() + duration);
+          
+          events.push({
+            summary: event.summary,
+            start: todayStart,
+            end: todayEnd
+          });
+        }
+      }
+      // Add more recurrence patterns as needed
+    }
+
+    function updateDisplay(events) {
+      const now = new Date();
+      const todayEvents = events.filter(e => e.start && e.start.toDateString() === now.toDateString());
+      const ongoing = todayEvents.find(e => now >= e.start && now < e.end);
+      
+      // Update status message
+      const statusEl = document.getElementById("status-message");
+      if (ongoing) {
+        const minutesLeft = Math.floor((ongoing.end - now) / 60000);
+        const hoursLeft = Math.floor(minutesLeft / 60);
+        const minsLeft = minutesLeft % 60;
+        
+        let timeText = "";
+        if (hoursLeft > 0) {
+          timeText = `${hoursLeft} hour${hoursLeft > 1 ? 's' : ''}, ${minsLeft} minute${minsLeft !== 1 ? 's' : ''}`;
+        } else {
+          timeText = `${minsLeft} minute${minsLeft !== 1 ? 's' : ''}`;
+        }
+        
+        statusEl.textContent = `In use for ${timeText}`;
+        statusEl.className = "status-message busy";
+      } else {
+        const next = todayEvents.find(e => e.start > now);
+        if (next) {
+          const minutesUntil = Math.floor((next.start - now) / 60000);
+          const hoursUntil = Math.floor(minutesUntil / 60);
+          const minsUntil = minutesUntil % 60;
+          
+          let timeText = "";
+          if (hoursUntil > 0) {
+            timeText = `${hoursUntil} hour${hoursUntil > 1 ? 's' : ''}, ${minsUntil} minute${minsUntil !== 1 ? 's' : ''}`;
+          } else {
+            timeText = `${minsUntil} minute${minsUntil !== 1 ? 's' : ''}`;
+          }
+          
+          statusEl.textContent = `Free for ${timeText}`;
+        } else {
+          statusEl.textContent = "Free all day";
+        }
+        statusEl.className = "status-message available";
+      }
+      
+      // Build timeline
+      buildTimeline(todayEvents);
+    }
+
+    function buildTimeline(events) {
+      const timeline = document.getElementById("timeline");
+      timeline.innerHTML = "";
+      
+      if (events.length === 0) {
+        timeline.innerHTML = '<div class="no-events">No meetings scheduled today</div>';
+        return;
+      }
+      
+      // Sort events by start time
+      events.sort((a, b) => a.start - b.start);
+      
+      // Generate hourly slots from 6am to 6pm
+      const startHour = 6;
+      const endHour = 18;
+      
+      for (let hour = startHour; hour <= endHour; hour++) {
+        const timeSlot = document.createElement("div");
+        timeSlot.className = "time-slot";
+        
+        const timeLabel = document.createElement("div");
+        timeLabel.className = "time-label";
+        const ampm = hour >= 12 ? "pm" : "am";
+        const displayHour = hour > 12 ? hour - 12 : hour;
+        timeLabel.textContent = `${displayHour}:00${ampm}`;
+        
+        timeSlot.appendChild(timeLabel);
+        
+        // Find events that start in this hour
+        const hourEvents = events.filter(e => e.start.getHours() === hour);
+        
+        if (hourEvents.length > 0) {
+          hourEvents.forEach(event => {
+            const eventBlock = document.createElement("div");
+            eventBlock.className = "event-block";
+            
+            const title = document.createElement("div");
+            title.className = "event-title";
+            title.textContent = event.summary || "Meeting";
+            
+            const time = document.createElement("div");
+            time.className = "event-time";
+            time.textContent = `${formatTime(event.start)} - ${formatTime(event.end)}`;
+            
+            eventBlock.appendChild(title);
+            eventBlock.appendChild(time);
+            timeSlot.appendChild(eventBlock);
+          });
+        }
+        
+        timeline.appendChild(timeSlot);
+      }
+    }
+
+    function formatTime(d) {
+      return d ? d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }) : "";
+    }
+
+    loadICS();
+    setInterval(loadICS, 120000);
+  </script>
+</body>
+</html>
