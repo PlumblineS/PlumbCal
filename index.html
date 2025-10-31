@@ -145,8 +145,8 @@
 
     .calendar-grid {
       display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 6px;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
     }
 
     .calendar-day-name {
@@ -434,8 +434,8 @@
       const grid = document.getElementById("calendar-grid");
       grid.innerHTML = "";
       
-      // Day names
-      const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+      // Day names - Monday through Friday only
+      const dayNames = ["Mon", "Tue", "Wed", "Thu", "Fri"];
       dayNames.forEach(name => {
         const dayName = document.createElement("div");
         dayName.className = "calendar-day-name";
@@ -443,54 +443,58 @@
         grid.appendChild(dayName);
       });
       
-      // Previous month's trailing days
-      for (let i = startingDayOfWeek - 1; i >= 0; i--) {
-        const day = document.createElement("div");
-        day.className = "calendar-day other-month";
-        day.innerHTML = `<div class="day-number">${prevMonthLastDay - i}</div>`;
-        grid.appendChild(day);
+      // Find the first Monday of the month (or before it)
+      let currentDate = new Date(firstDay);
+      // Go back to previous Monday if month doesn't start on Monday
+      while (currentDate.getDay() !== 1) {
+        currentDate.setDate(currentDate.getDate() - 1);
       }
       
-      // Current month's days
-      for (let day = 1; day <= daysInMonth; day++) {
-        const dayEl = document.createElement("div");
-        const dayDate = new Date(year, month, day);
-        const isToday = day === now.getDate() && month === now.getMonth();
-        
-        dayEl.className = "calendar-day" + (isToday ? " today" : "");
-        
-        // Find events for this day
-        const dayEvents = events.filter(e => {
-          if (!e.start) return false;
-          return e.start.getDate() === day && 
-                 e.start.getMonth() === month && 
-                 e.start.getFullYear() === year;
-        });
-        
-        let innerHTML = `<div class="day-number">${day}</div>`;
-        
-        if (dayEvents.length > 0) {
-          dayEl.classList.add("has-events");
-          // Show first event name (truncated)
-          const firstEvent = dayEvents[0].summary || "Meeting";
-          innerHTML += `<div class="event-indicator">${firstEvent}</div>`;
-          if (dayEvents.length > 1) {
-            innerHTML += `<div class="event-count">+${dayEvents.length - 1} more</div>`;
+      // Generate 5 weeks of weekdays (25 days total)
+      for (let week = 0; week < 5; week++) {
+        for (let dayOfWeek = 1; dayOfWeek <= 5; dayOfWeek++) {
+          const day = currentDate.getDate();
+          const currentMonth = currentDate.getMonth();
+          const currentYear = currentDate.getFullYear();
+          
+          const dayEl = document.createElement("div");
+          const isToday = day === now.getDate() && 
+                         currentMonth === now.getMonth() && 
+                         currentYear === now.getFullYear();
+          const isCurrentMonth = currentMonth === month;
+          
+          dayEl.className = "calendar-day" + 
+                           (isToday ? " today" : "") + 
+                           (!isCurrentMonth ? " other-month" : "");
+          
+          // Find events for this day
+          const dayEvents = events.filter(e => {
+            if (!e.start) return false;
+            return e.start.getDate() === day && 
+                   e.start.getMonth() === currentMonth && 
+                   e.start.getFullYear() === currentYear;
+          });
+          
+          let innerHTML = `<div class="day-number">${day}</div>`;
+          
+          if (dayEvents.length > 0) {
+            dayEl.classList.add("has-events");
+            // Show first event name (truncated)
+            const firstEvent = dayEvents[0].summary || "Meeting";
+            innerHTML += `<div class="event-indicator">${firstEvent}</div>`;
+            if (dayEvents.length > 1) {
+              innerHTML += `<div class="event-count">+${dayEvents.length - 1} more</div>`;
+            }
           }
+          
+          dayEl.innerHTML = innerHTML;
+          grid.appendChild(dayEl);
+          
+          // Move to next day
+          currentDate.setDate(currentDate.getDate() + 1);
         }
-        
-        dayEl.innerHTML = innerHTML;
-        grid.appendChild(dayEl);
-      }
-      
-      // Next month's leading days
-      const totalCells = grid.children.length - 7; // minus day names
-      const remainingCells = 35 - totalCells; // 5 weeks of days
-      for (let day = 1; day <= remainingCells; day++) {
-        const dayEl = document.createElement("div");
-        dayEl.className = "calendar-day other-month";
-        dayEl.innerHTML = `<div class="day-number">${day}</div>`;
-        grid.appendChild(dayEl);
+        // Skip weekend
+        currentDate.setDate(currentDate.getDate() + 2);
       }
     }
   </script>
