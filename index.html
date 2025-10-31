@@ -308,8 +308,8 @@
       // Sort events by start time
       events.sort((a, b) => a.start - b.start);
       
-      // Generate hourly slots from 8am to 6pm
-      const startHour = 8;
+      // Generate hourly slots from 6am to 6pm
+      const startHour = 6;
       const endHour = 18;
       
       for (let hour = startHour; hour <= endHour; hour++) {
