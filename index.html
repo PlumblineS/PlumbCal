@@ -329,9 +329,21 @@
 
         const fc = document.getElementById("forecast");
         fc.innerHTML = "";
-        for (let i = 1; i < data.daily.time.length; i++) {
+        // Show 3 days only
+        for (let i = 1; i <= 3 && i < data.daily.time.length; i++) {
           const d = new Date(data.daily.time[i]);
-          fc.innerHTML += `<div>${["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][d.getDay()]}<br>${codes[data.daily.weathercode[i]] || ""}<br><small>${Math.round(data.daily.temperature_2m_max[i])}°/${Math.round(data.daily.temperature_2m_min[i])}°</small></div>`;
+          const dayName = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][d.getDay()];
+          const icon = codes[data.daily.weathercode[i]] || "";
+          const high = Math.round(data.daily.temperature_2m_max[i]);
+          const low = Math.round(data.daily.temperature_2m_min[i]);
+          
+          fc.innerHTML += `
+            <div>
+              <div class="forecast-day-name">${dayName}</div>
+              <div class="forecast-icon">${icon}</div>
+              <div class="forecast-temps">${high}°/${low}°</div>
+            </div>
+          `;
         }
       } catch (e) {
         console.log("Weather error", e);
