@@ -5,143 +5,105 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="screen-orientation" content="landscape" />
   <title>Centennial – South Conference Room</title>
   <style>
     * {
       box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
 
     html, body {
-      margin: 0;
-      padding: 0;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: #1a2332;
+      background: linear-gradient(135deg, #1a2332 0%, #2d3e50 100%);
       color: #fff;
       overflow: hidden;
       width: 100%;
-      min-height: 100vh;
-      position: relative;
-    }
-
-    .background {
-      position: fixed;
-      inset: 0;
-      background: linear-gradient(135deg, #1a2332 0%, #2d3e50 100%);
-      background-size: cover;
-      background-position: center;
-      filter: blur(0px);
-      z-index: 0;
-    }
-
-    .overlay {
-      position: fixed;
-      inset: 0;
-      background: linear-gradient(180deg, 
-        rgba(26, 35, 50, 0.85) 0%, 
-        rgba(26, 35, 50, 0.75) 50%,
-        rgba(26, 35, 50, 0.85) 100%);
-      z-index: 1;
+      height: 100vh;
     }
 
     /* Header */
     header {
-      position: relative;
-      z-index: 2;
-      padding: 30px 50px;
       background: rgba(15, 23, 35, 0.95);
       border-bottom: 3px solid #3a5a7f;
+      padding: 20px 40px;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
 
     header h1 {
-      font-size: 2.2rem;
+      font-size: 1.8rem;
       font-weight: 300;
       color: #ffffff;
-      margin: 0;
       letter-spacing: 0.5px;
     }
 
     #logo {
-      max-width: 180px;
+      max-width: 160px;
       height: auto;
     }
 
-    /* Main Content */
-    .container {
-      position: relative;
-      z-index: 2;
-      display: flex;
-      flex-direction: column;
+    /* Main Grid Layout */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      padding: 30px 40px;
+      height: calc(100vh - 80px);
       align-items: center;
-      justify-content: center;
-      min-height: calc(100vh - 140px);
-      padding: 20px;
     }
 
-    /* Status Card */
-    .status-card {
+    /* Left Column - Status */
+    .left-column {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .clock {
+      font-size: 5.5rem;
+      font-weight: 200;
+      letter-spacing: -2px;
+      margin-bottom: 10px;
+    }
+
+    .date {
+      font-size: 1.4rem;
+      font-weight: 300;
+      color: #b8c5d6;
+      letter-spacing: 1px;
+      margin-bottom: 40px;
+    }
+
+    .status-display {
       background: rgba(255, 255, 255, 0.08);
       backdrop-filter: blur(20px);
       border: 1px solid rgba(255, 255, 255, 0.15);
       border-radius: 20px;
-      padding: 40px 60px;
+      padding: 40px 50px;
       text-align: center;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-      max-width: 800px;
-      width: 90%;
-    }
-
-    .clock {
-      font-size: 5rem;
-      font-weight: 200;
-      letter-spacing: -2px;
-      margin: 0 0 10px 0;
-      color: #ffffff;
-    }
-
-    .date {
-      font-size: 1.3rem;
-      font-weight: 300;
-      margin: 0 0 30px 0;
-      color: #b8c5d6;
-      letter-spacing: 1px;
-    }
-
-    /* Availability Status */
-    .status-section {
-      margin: 30px 0;
-      padding: 30px;
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 15px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      width: 100%;
+      max-width: 500px;
     }
 
     #status {
-      font-size: 2rem;
+      font-size: 2.2rem;
       font-weight: 400;
-      margin: 0;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 15px;
     }
 
-    #status.available { 
-      color: #4caf50;
-    }
-    
-    #status.busy { 
-      color: #ef5350;
-    }
+    #status.available { color: #4caf50; }
+    #status.busy { color: #ef5350; }
 
     .status-icon {
-      width: 24px;
-      height: 24px;
+      width: 20px;
+      height: 20px;
       border-radius: 50%;
-      display: inline-block;
     }
 
     .status-icon.available {
@@ -154,13 +116,24 @@
       box-shadow: 0 0 20px rgba(239, 83, 80, 0.5);
     }
 
-    /* Upcoming Meetings */
-    .upcoming {
-      margin-top: 30px;
-      width: 100%;
+    /* Right Column - Meetings & Weather */
+    .right-column {
+      display: flex;
+      flex-direction: column;
+      gap: 25px;
+      max-height: 100%;
+      overflow-y: auto;
     }
 
-    .upcoming-title {
+    .section-card {
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 15px;
+      padding: 25px;
+    }
+
+    .section-title {
       font-size: 0.9rem;
       color: #8899aa;
       margin-bottom: 15px;
@@ -173,7 +146,7 @@
       background: rgba(255, 255, 255, 0.06);
       padding: 15px 20px;
       margin: 10px 0;
-      border-radius: 12px;
+      border-radius: 10px;
       font-size: 1rem;
       color: #d4dce6;
       border-left: 4px solid #3a5a7f;
@@ -185,110 +158,114 @@
     .appointment-time {
       font-weight: 600;
       color: #7fa3c9;
-      font-size: 0.95rem;
+      white-space: nowrap;
     }
 
     .appointment-title {
       flex: 1;
       margin-left: 15px;
       font-weight: 400;
-      font-size: 0.95rem;
+    }
+
+    .no-meetings {
+      color: #8899aa;
+      font-style: italic;
+      text-align: center;
+      padding: 15px;
     }
 
     /* Weather */
-    .weather {
-      position: absolute;
-      bottom: 100px;
-      left: 50px;
-      z-index: 2;
-      background: rgba(15, 23, 35, 0.8);
-      backdrop-filter: blur(10px);
-      padding: 25px 35px;
-      border-radius: 15px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
+    .weather-content {
+      display: flex;
+      align-items: center;
+      gap: 30px;
+    }
+
+    .current-weather {
+      display: flex;
+      align-items: center;
+      gap: 15px;
     }
 
     .temp {
       font-size: 2.5rem;
       font-weight: 300;
-      margin-bottom: 10px;
-      color: #ffffff;
     }
 
     #conditions {
-      font-size: 1.8rem;
-      margin-bottom: 15px;
+      font-size: 2rem;
     }
 
     .forecast {
       display: flex;
       gap: 20px;
-      font-size: 1rem;
-      padding-top: 15px;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      flex: 1;
+      justify-content: center;
     }
 
     .forecast > div {
       text-align: center;
-      min-width: 70px;
     }
 
     .forecast-day-name {
       font-weight: 500;
-      margin-bottom: 8px;
+      margin-bottom: 5px;
       color: #8899aa;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
     }
 
     .forecast-icon {
-      font-size: 2rem;
-      margin: 8px 0;
+      font-size: 1.8rem;
+      margin: 5px 0;
     }
 
     .forecast-temps {
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       color: #b8c5d6;
-    }
-
-    /* No meetings message */
-    .no-meetings {
-      color: #8899aa;
-      font-style: italic;
-      font-size: 1.1rem;
-      padding: 20px;
     }
   </style>
 </head>
 <body>
-
-  <div class="background"></div>
-  <div class="overlay"></div>
 
   <header>
     <h1>Centennial – South Conference Room</h1>
     <img id="logo" src="https://wg.scene7.com/is/image/wrenchgroup/updated-2023-logo-pl23wi001wg?fmt=png-alpha" alt="Plumbline Logo">
   </header>
 
-  <div class="container">
-    <div class="status-card">
+  <div class="main-grid">
+    <!-- Left: Clock & Status -->
+    <div class="left-column">
       <div class="clock" id="clock">--:--</div>
       <div class="date" id="date">Loading...</div>
       
-      <div class="status-section">
+      <div class="status-display">
         <div id="status">
           <span class="status-icon available" id="status-icon"></span>
           <span id="status-text">Loading schedule...</span>
         </div>
       </div>
-
-      <div class="upcoming" id="upcoming"></div>
     </div>
-  </div>
 
-  <div class="weather">
-    <div class="temp" id="temp">--°F</div>
-    <div id="conditions"></div>
-    <div class="forecast" id="forecast"></div>
+    <!-- Right: Meetings & Weather -->
+    <div class="right-column">
+      <!-- Upcoming Meetings -->
+      <div class="section-card">
+        <div class="section-title">Today's Schedule</div>
+        <div id="upcoming"></div>
+      </div>
+
+      <!-- Weather -->
+      <div class="section-card">
+        <div class="section-title">Weather</div>
+        <div class="weather-content">
+          <div class="current-weather">
+            <div class="temp" id="temp">--°F</div>
+            <div id="conditions"></div>
+          </div>
+          <div class="forecast" id="forecast"></div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -405,10 +382,10 @@
       
       // Show upcoming appointments
       const upcomingEl = document.getElementById("upcoming");
-      const futureEvents = todayEvents.filter(e => e.start > now).slice(0, 4);
+      const futureEvents = todayEvents.filter(e => e.start > now).slice(0, 5);
       
       if (futureEvents.length > 0) {
-        let html = '<div class="upcoming-title">Upcoming Today</div>';
+        let html = '';
         futureEvents.forEach(event => {
           html += `
             <div class="appointment">
@@ -421,7 +398,7 @@
       } else if (!ongoing) {
         upcomingEl.innerHTML = '<div class="no-meetings">No meetings scheduled for today</div>';
       } else {
-        upcomingEl.innerHTML = '';
+        upcomingEl.innerHTML = '<div class="no-meetings">No more meetings today</div>';
       }
     }
 
