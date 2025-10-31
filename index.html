@@ -220,12 +220,26 @@
         const lines = unfolded.split(/\r?\n/);
         const events = [];
         let current = {};
+        
         for (const line of lines) {
-          if (line.startsWith("BEGIN:VEVENT")) current = {};
-          else if (line.startsWith("SUMMARY:")) current.summary = line.slice(8).trim();
-          else if (line.startsWith("DTSTART")) current.start = parseDate(line);
-          else if (line.startsWith("DTEND")) current.end = parseDate(line);
-          else if (line.startsWith("END:VEVENT")) events.push(current);
+          if (line.startsWith("BEGIN:VEVENT")) {
+            current = {};
+          } else if (line.startsWith("SUMMARY:")) {
+            current.summary = line.slice(8).trim();
+          } else if (line.startsWith("DTSTART")) {
+            current.start = parseDate(line);
+          } else if (line.startsWith("DTEND")) {
+            current.end = parseDate(line);
+          } else if (line.startsWith("RRULE:")) {
+            current.rrule = line.slice(6).trim();
+          } else if (line.startsWith("END:VEVENT")) {
+            // If it's a recurring event, expand it for today
+            if (current.rrule && current.start) {
+              expandRecurringEvent(current, events);
+            } else {
+              events.push(current);
+            }
+          }
         }
 
         updateDisplay(events);
@@ -233,6 +247,52 @@
         document.getElementById("status-message").textContent = "Unable to load schedule";
         console.error("ICS error", e);
       }
+    }
+
+    function expandRecurringEvent(event, events) {
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      
+      // Check if the original event is today
+      if (event.start.toDateString() === today.toDateString()) {
+        events.push(event);
+        return;
+      }
+      
+      // Parse RRULE to check if event occurs today
+      if (event.rrule.includes("FREQ=DAILY")) {
+        // Daily recurrence - create instance for today
+        const duration = event.end - event.start;
+        const todayStart = new Date(today);
+        todayStart.setHours(event.start.getHours(), event.start.getMinutes(), 0, 0);
+        
+        const todayEnd = new Date(todayStart.getTime() + duration);
+        
+        events.push({
+          summary: event.summary,
+          start: todayStart,
+          end: todayEnd
+        });
+      } else if (event.rrule.includes("FREQ=WEEKLY")) {
+        // Weekly recurrence - check if today matches the day of week
+        const eventDay = event.start.getDay();
+        const todayDay = today.getDay();
+        
+        if (eventDay === todayDay) {
+          const duration = event.end - event.start;
+          const todayStart = new Date(today);
+          todayStart.setHours(event.start.getHours(), event.start.getMinutes(), 0, 0);
+          
+          const todayEnd = new Date(todayStart.getTime() + duration);
+          
+          events.push({
+            summary: event.summary,
+            start: todayStart,
+            end: todayEnd
+          });
+        }
+      }
+      // Add more recurrence patterns as needed
     }
 
     function parseDate(line) {
