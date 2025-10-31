@@ -7,11 +7,15 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>Centennial – South Conference Room</title>
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     html, body {
       margin: 0;
       padding: 0;
-      font-family: "Segoe UI", sans-serif;
-      background: #000;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #1a2332;
       color: #fff;
       overflow: hidden;
       width: 100%;
@@ -23,287 +27,274 @@
     .background {
       position: fixed;
       inset: 0;
+      background: linear-gradient(135deg, #1a2332 0%, #2d3e50 100%);
       background-size: cover;
       background-position: center;
-      transition: opacity 2s ease-in-out;
+      filter: blur(0px);
+      z-index: 0;
     }
 
-    .fade {
-      opacity: 0;
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(180deg, 
+        rgba(26, 35, 50, 0.85) 0%, 
+        rgba(26, 35, 50, 0.75) 50%,
+        rgba(26, 35, 50, 0.85) 100%);
+      z-index: 1;
     }
 
+    /* Header */
     header {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
+      position: relative;
+      z-index: 2;
+      padding: 30px 50px;
+      background: rgba(15, 23, 35, 0.95);
+      border-bottom: 3px solid #3a5a7f;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      z-index: 2;
-      padding: 20px 30px;
-      background: rgba(50, 50, 50, 0.95);
-      backdrop-filter: blur(10px);
     }
 
     header h1 {
-      font-size: 2.0rem;
-      font-weight: 600;
-      color: #00539f;
-      text-shadow: 0 0 8px rgba(0,0,0,0.4);
+      font-size: 2.2rem;
+      font-weight: 300;
+      color: #ffffff;
+      margin: 0;
+      letter-spacing: 0.5px;
     }
 
     #logo {
-      max-width: 170px;
+      max-width: 180px;
       height: auto;
-      opacity: 0.95;
     }
 
-    main {
+    /* Main Content */
+    .container {
       position: relative;
       z-index: 2;
-      height: 100vh;
-      padding: 0 30px;
-      display: flex;
-      justify-content: space-between;
-      align-items: stretch;
-      padding-top: 80px;
-    }
-
-    .left-content {
-      flex: 1;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding-right: 40px;
+      height: calc(100vh - 140px);
+      padding: 40px;
     }
 
-    .middle-box {
+    /* Status Card */
+    .status-card {
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 20px;
+      padding: 60px 80px;
       text-align: center;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      max-width: 900px;
+      width: 100%;
     }
 
     .clock {
-      font-size: 4rem;
-      font-weight: 600;
-      margin: 0 0 5px 0;
+      font-size: 6rem;
+      font-weight: 200;
+      letter-spacing: -2px;
+      margin: 0 0 15px 0;
+      color: #ffffff;
     }
 
     .date {
-      font-size: 1.2rem;
+      font-size: 1.5rem;
+      font-weight: 300;
       margin: 0 0 50px 0;
-      color: #f7b500;
-    }
-
-    #status {
-      font-size: 1.6rem;
-      font-weight: 600;
-      margin: 0;
-    }
-
-    #status.available { color: #00c853; }
-    #status.busy { color: #e53935; }
-
-    .upcoming {
-      margin-top: 50px;
-      font-size: 1.1rem;
-      opacity: 0.9;
-    }
-
-    .upcoming-title {
-      font-size: 0.9rem;
-      color: #f7b500;
-      margin-bottom: 10px;
-      text-transform: uppercase;
+      color: #b8c5d6;
       letter-spacing: 1px;
     }
 
-    .appointment {
-      margin: 8px 0;
-      color: #ccc;
+    /* Availability Status */
+    .status-section {
+      margin: 40px 0;
+      padding: 40px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 15px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
     }
 
+    #status {
+      font-size: 2.5rem;
+      font-weight: 400;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+    }
+
+    #status.available { 
+      color: #4caf50;
+    }
+    
+    #status.busy { 
+      color: #ef5350;
+    }
+
+    .status-icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .status-icon.available {
+      background: #4caf50;
+      box-shadow: 0 0 20px rgba(76, 175, 80, 0.5);
+    }
+
+    .status-icon.busy {
+      background: #ef5350;
+      box-shadow: 0 0 20px rgba(239, 83, 80, 0.5);
+    }
+
+    /* Upcoming Meetings */
+    .upcoming {
+      margin-top: 40px;
+      width: 100%;
+    }
+
+    .upcoming-title {
+      font-size: 1rem;
+      color: #8899aa;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-weight: 500;
+    }
+
+    .appointment {
+      background: rgba(255, 255, 255, 0.06);
+      padding: 20px 30px;
+      margin: 12px 0;
+      border-radius: 12px;
+      font-size: 1.2rem;
+      color: #d4dce6;
+      border-left: 4px solid #3a5a7f;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .appointment-time {
+      font-weight: 600;
+      color: #7fa3c9;
+    }
+
+    .appointment-title {
+      flex: 1;
+      margin-left: 20px;
+      font-weight: 400;
+    }
+
+    /* Weather */
     .weather {
       position: absolute;
-      bottom: 20px;
-      left: 30px;
-      padding-bottom: env(safe-area-inset-bottom);
-    }
-
-    .calendar-container {
-      width: 400px;
-      min-width: 400px;
-      background: rgba(40, 40, 40, 0.7);
+      bottom: 100px;
+      left: 50px;
+      z-index: 2;
+      background: rgba(15, 23, 35, 0.8);
       backdrop-filter: blur(10px);
-      border-radius: 12px;
-      padding: 20px;
-      align-self: center;
-      max-height: 85vh;
-      overflow-y: auto;
-    }
-
-    .calendar-header {
-      text-align: center;
-      font-size: 1.3rem;
-      font-weight: 600;
-      margin-bottom: 15px;
-      color: #f7b500;
-    }
-
-    .calendar-grid {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 8px;
-    }
-
-    .calendar-day-name {
-      text-align: center;
-      font-size: 0.75rem;
-      font-weight: 600;
-      padding: 6px 0;
-      color: #00539f;
-    }
-
-    .calendar-day {
-      aspect-ratio: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      background: rgba(60, 60, 60, 0.5);
-      border-radius: 4px;
-      font-size: 0.75rem;
-      cursor: pointer;
-      transition: background 0.2s;
-      position: relative;
-      padding: 3px;
-      min-height: 45px;
-    }
-
-    .calendar-day:hover {
-      background: rgba(80, 80, 80, 0.7);
-    }
-
-    .calendar-day.today {
-      background: rgba(0, 83, 159, 0.6);
-      font-weight: 700;
-    }
-
-    .calendar-day.has-events {
-      border: 2px solid #f7b500;
-    }
-
-    .calendar-day.other-month {
-      opacity: 0.3;
-    }
-
-    .day-number {
-      font-size: 0.85rem;
-      margin-bottom: 1px;
-      font-weight: 600;
-    }
-
-    .event-indicator {
-      font-size: 0.6rem;
-      color: #f7b500;
-      text-align: center;
-      line-height: 1.1;
-      max-width: 100%;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-    }
-
-    .event-count {
-      font-size: 0.6rem;
-      color: #00c853;
-      margin-top: 1px;
+      padding: 25px 35px;
+      border-radius: 15px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
     }
 
     .temp {
-      font-size: 2rem;
-      font-weight: 600;
+      font-size: 2.5rem;
+      font-weight: 300;
+      margin-bottom: 10px;
+      color: #ffffff;
+    }
+
+    #conditions {
+      font-size: 1.8rem;
+      margin-bottom: 15px;
     }
 
     .forecast {
       display: flex;
-      gap: 12px;
-      margin-top: 12px;
-      font-size: 0.85rem;
+      gap: 20px;
+      font-size: 1rem;
+      padding-top: 15px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
     }
 
-    .forecast div {
+    .forecast > div {
       text-align: center;
+      min-width: 70px;
+    }
+
+    .forecast-day-name {
+      font-weight: 500;
+      margin-bottom: 8px;
+      color: #8899aa;
+      font-size: 0.9rem;
+    }
+
+    .forecast-icon {
+      font-size: 2rem;
+      margin: 8px 0;
+    }
+
+    .forecast-temps {
+      font-size: 0.95rem;
+      color: #b8c5d6;
+    }
+
+    /* No meetings message */
+    .no-meetings {
+      color: #8899aa;
+      font-style: italic;
+      font-size: 1.1rem;
+      padding: 20px;
     }
   </style>
 </head>
 <body>
 
-  <div id="bg1" class="background"></div>
-  <div id="bg2" class="background fade"></div>
+  <div class="background"></div>
+  <div class="overlay"></div>
 
   <header>
     <h1>Centennial – South Conference Room</h1>
     <img id="logo" src="https://wg.scene7.com/is/image/wrenchgroup/updated-2023-logo-pl23wi001wg?fmt=png-alpha" alt="Plumbline Logo">
   </header>
 
-  <main>
-    <div class="left-content">
-      <!-- Center: Clock, Date, Status -->
-      <div class="middle-box">
-        <div class="clock" id="clock">--:--</div>
-        <div class="date" id="date">Loading...</div>
-        <div id="status">Loading schedule...</div>
-        <div class="upcoming" id="upcoming"></div>
+  <div class="container">
+    <div class="status-card">
+      <div class="clock" id="clock">--:--</div>
+      <div class="date" id="date">Loading...</div>
+      
+      <div class="status-section">
+        <div id="status">
+          <span class="status-icon available" id="status-icon"></span>
+          <span id="status-text">Loading schedule...</span>
+        </div>
       </div>
-    </div>
 
-    <!-- Right: Month Calendar -->
-    <div class="calendar-container">
-      <div class="calendar-header" id="calendar-header">October 2024</div>
-      <div class="calendar-grid" id="calendar-grid"></div>
+      <div class="upcoming" id="upcoming"></div>
     </div>
+  </div>
 
-    <!-- Bottom: Weather -->
-    <div class="weather" id="weather">
-      <div class="temp" id="temp">--°F</div>
-      <div id="conditions"></div>
-      <div class="forecast" id="forecast"></div>
-    </div>
-  </main>
+  <div class="weather">
+    <div class="temp" id="temp">--°F</div>
+    <div id="conditions"></div>
+    <div class="forecast" id="forecast"></div>
+  </div>
 
   <script>
-    const IMAGES = [
-      "images/calphoto1.jpg",
-      "images/calphoto2.jpg",
-      "images/calphoto3.jpg",
-      "images/calphoto4.jpg",
-      "images/calphoto5.jpg"
-    ];
-
     const ICS_URL = "https://ics-proxy.highdefpants.workers.dev/?url=" + encodeURIComponent(
       "https://outlook.office365.com/owa/calendar/73ff77286546455d984e75751c99096d@plumblineservices.com/e8f33aaadcfb49e5b0a03df0bdb5e2c58129590484901015770/calendar.ics"
     );
 
     const LAT = 39.5807, LON = -104.8772;
-
-    // Background rotation
-    let currentBg = 0;
-    const bg1 = document.getElementById("bg1");
-    const bg2 = document.getElementById("bg2");
-    bg1.style.backgroundImage = `url('${IMAGES[0]}')`;
-
-    setInterval(() => {
-      const next = (currentBg + 1) % IMAGES.length;
-      const front = currentBg % 2 ? bg2 : bg1;
-      const back = currentBg % 2 ? bg1 : bg2;
-      back.style.backgroundImage = `url('${IMAGES[next]}')`;
-      front.classList.add("fade");
-      back.classList.remove("fade");
-      currentBg = next;
-    }, 15000);
 
     // Clock
     function updateClock() {
@@ -311,7 +302,7 @@
       document.getElementById("clock").textContent =
         now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
       document.getElementById("date").textContent =
-        now.toLocaleDateString([], { weekday: "long", month: "long", day: "numeric" });
+        now.toLocaleDateString([], { weekday: "long", month: "long", day: "numeric", year: "numeric" });
     }
     setInterval(updateClock, 1000);
     updateClock();
@@ -329,7 +320,6 @@
 
         const fc = document.getElementById("forecast");
         fc.innerHTML = "";
-        // Show 3 days only
         for (let i = 1; i <= 3 && i < data.daily.time.length; i++) {
           const d = new Date(data.daily.time[i]);
           const dayName = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][d.getDay()];
@@ -353,7 +343,7 @@
     loadWeather();
     setInterval(loadWeather, 1800000);
 
-    // ICS calendar status (today only)
+    // ICS calendar status
     async function loadICS() {
       try {
         const res = await fetch(ICS_URL);
@@ -371,9 +361,8 @@
         }
 
         updateStatus(events);
-        buildCalendar(events);
       } catch (e) {
-        document.getElementById("status").textContent = "Unable to load schedule";
+        document.getElementById("status-text").textContent = "Unable to load schedule";
         console.error("ICS error", e);
       }
     }
@@ -398,28 +387,39 @@
       const todayEvents = events.filter(e => e.start && e.start.toDateString() === now.toDateString());
       const ongoing = todayEvents.find(e => now >= e.start && now < e.end);
       const statusEl = document.getElementById("status");
+      const statusText = document.getElementById("status-text");
+      const statusIcon = document.getElementById("status-icon");
       
       if (ongoing) {
-        statusEl.textContent = "🔴 In Use – " + (ongoing.summary || "Meeting") + " until " + formatTime(ongoing.end);
+        statusText.textContent = "In Use – " + (ongoing.summary || "Meeting") + " until " + formatTime(ongoing.end);
         statusEl.className = "busy";
+        statusIcon.className = "status-icon busy";
       } else {
         const next = todayEvents.find(e => e.start > now);
-        statusEl.textContent = next ? "🟢 Available until " + formatTime(next.start) : "🟢 Available all day";
+        statusText.textContent = next ? "Available until " + formatTime(next.start) : "Available all day";
         statusEl.className = "available";
+        statusIcon.className = "status-icon available";
       }
       
       // Show upcoming appointments
       const upcomingEl = document.getElementById("upcoming");
-      const futureEvents = todayEvents.filter(e => e.start > now).slice(0, 3);
+      const futureEvents = todayEvents.filter(e => e.start > now).slice(0, 4);
       
       if (futureEvents.length > 0) {
         let html = '<div class="upcoming-title">Upcoming Today</div>';
         futureEvents.forEach(event => {
-          html += `<div class="appointment">${formatTime(event.start)} - ${formatTime(event.end)}: ${event.summary || "Meeting"}</div>`;
+          html += `
+            <div class="appointment">
+              <span class="appointment-time">${formatTime(event.start)} - ${formatTime(event.end)}</span>
+              <span class="appointment-title">${event.summary || "Meeting"}</span>
+            </div>
+          `;
         });
         upcomingEl.innerHTML = html;
+      } else if (!ongoing) {
+        upcomingEl.innerHTML = '<div class="no-meetings">No meetings scheduled for today</div>';
       } else {
-        upcomingEl.innerHTML = "";
+        upcomingEl.innerHTML = '';
       }
     }
 
@@ -429,93 +429,6 @@
 
     loadICS();
     setInterval(loadICS, 120000);
-
-    // Build month calendar
-    function buildCalendar(events) {
-      const now = new Date();
-      const year = now.getFullYear();
-      const month = now.getMonth();
-      
-      // Update header
-      const monthNames = ["January", "February", "March", "April", "May", "June",
-        "July", "August", "September", "October", "November", "December"];
-      document.getElementById("calendar-header").textContent = `${monthNames[month]} ${year}`;
-      
-      // Get first day of month and number of days
-      const firstDay = new Date(year, month, 1);
-      const lastDay = new Date(year, month + 1, 0);
-      const daysInMonth = lastDay.getDate();
-      const startingDayOfWeek = firstDay.getDay();
-      
-      // Get last month's days to fill in
-      const prevMonthLastDay = new Date(year, month, 0).getDate();
-      
-      const grid = document.getElementById("calendar-grid");
-      grid.innerHTML = "";
-      
-      // Day names - Monday through Friday only
-      const dayNames = ["Mon", "Tue", "Wed", "Thu", "Fri"];
-      dayNames.forEach(name => {
-        const dayName = document.createElement("div");
-        dayName.className = "calendar-day-name";
-        dayName.textContent = name;
-        grid.appendChild(dayName);
-      });
-      
-      // Find the first Monday of the month (or before it)
-      let currentDate = new Date(firstDay);
-      // Go back to previous Monday if month doesn't start on Monday
-      while (currentDate.getDay() !== 1) {
-        currentDate.setDate(currentDate.getDate() - 1);
-      }
-      
-      // Generate 5 weeks of weekdays (25 days total)
-      for (let week = 0; week < 5; week++) {
-        for (let dayOfWeek = 1; dayOfWeek <= 5; dayOfWeek++) {
-          const day = currentDate.getDate();
-          const currentMonth = currentDate.getMonth();
-          const currentYear = currentDate.getFullYear();
-          
-          const dayEl = document.createElement("div");
-          const isToday = day === now.getDate() && 
-                         currentMonth === now.getMonth() && 
-                         currentYear === now.getFullYear();
-          const isCurrentMonth = currentMonth === month;
-          
-          dayEl.className = "calendar-day" + 
-                           (isToday ? " today" : "") + 
-                           (!isCurrentMonth ? " other-month" : "");
-          
-          // Find events for this day
-          const dayEvents = events.filter(e => {
-            if (!e.start) return false;
-            return e.start.getDate() === day && 
-                   e.start.getMonth() === currentMonth && 
-                   e.start.getFullYear() === currentYear;
-          });
-          
-          let innerHTML = `<div class="day-number">${day}</div>`;
-          
-          if (dayEvents.length > 0) {
-            dayEl.classList.add("has-events");
-            // Show first event name (truncated)
-            const firstEvent = dayEvents[0].summary || "Meeting";
-            innerHTML += `<div class="event-indicator">${firstEvent}</div>`;
-            if (dayEvents.length > 1) {
-              innerHTML += `<div class="event-count">+${dayEvents.length - 1} more</div>`;
-            }
-          }
-          
-          dayEl.innerHTML = innerHTML;
-          grid.appendChild(dayEl);
-          
-          // Move to next day
-          currentDate.setDate(currentDate.getDate() + 1);
-        }
-        // Skip weekend
-        currentDate.setDate(currentDate.getDate() + 2);
-      }
-    }
   </script>
 </body>
 </html>
