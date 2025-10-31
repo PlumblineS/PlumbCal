@@ -15,254 +15,183 @@
 
     html, body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: linear-gradient(135deg, #1a2332 0%, #2d3e50 100%);
+      background: #1e3a8a;
       color: #fff;
       overflow: hidden;
       width: 100%;
       height: 100vh;
     }
 
-    /* Header */
-    header {
-      background: rgba(15, 23, 35, 0.95);
-      border-bottom: 3px solid #3a5a7f;
-      padding: 20px 40px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+    .container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      height: 100vh;
     }
 
-    header h1 {
-      font-size: 1.8rem;
-      font-weight: 300;
-      color: #ffffff;
-      letter-spacing: 0.5px;
+    /* Left Panel */
+    .left-panel {
+      background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+      display: flex;
+      flex-direction: column;
+      padding: 40px;
+      position: relative;
+    }
+
+    .logo-section {
+      margin-bottom: 60px;
     }
 
     #logo {
-      max-width: 160px;
+      max-width: 200px;
       height: auto;
+      filter: brightness(0) invert(1);
     }
 
-    /* Main Grid Layout */
-    .main-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 30px;
-      padding: 20px 40px;
-      height: calc(100vh - 80px);
-    }
-
-    /* Left Column - Clock centered higher */
-    .left-column {
+    .main-content {
+      flex: 1;
       display: flex;
       flex-direction: column;
-      justify-content: flex-start;
-      align-items: center;
-      padding-top: 60px;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    .room-name {
+      font-size: 3rem;
+      font-weight: 600;
+      margin-bottom: 20px;
+      line-height: 1.2;
+    }
+
+    .status-message {
+      font-size: 2rem;
+      font-weight: 300;
+      margin-bottom: 80px;
+      line-height: 1.4;
+    }
+
+    .status-message.available {
+      color: #86efac;
+    }
+
+    .status-message.busy {
+      color: #fca5a5;
+    }
+
+    .clock-section {
+      margin-top: auto;
     }
 
     .clock {
-      font-size: 6rem;
-      font-weight: 200;
-      letter-spacing: -2px;
-      margin-bottom: 10px;
+      font-size: 5rem;
+      font-weight: 300;
+      letter-spacing: -1px;
     }
 
     .date {
-      font-size: 1.5rem;
+      font-size: 1.3rem;
       font-weight: 300;
-      color: #b8c5d6;
-      letter-spacing: 1px;
-      margin-bottom: 50px;
+      opacity: 0.9;
+      margin-top: 5px;
     }
 
-    .status-display {
-      background: rgba(255, 255, 255, 0.08);
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      border-radius: 20px;
-      padding: 30px 40px;
-      text-align: center;
-      width: 100%;
+    /* Right Panel - Schedule */
+    .right-panel {
+      background: #f8fafc;
+      color: #1e293b;
+      padding: 40px;
+      overflow-y: auto;
     }
 
-    #status {
-      font-size: 2rem;
-      font-weight: 400;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 15px;
-    }
-
-    #status.available { color: #4caf50; }
-    #status.busy { color: #ef5350; }
-
-    .status-icon {
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-    }
-
-    .status-icon.available {
-      background: #4caf50;
-      box-shadow: 0 0 20px rgba(76, 175, 80, 0.5);
-    }
-
-    .status-icon.busy {
-      background: #ef5350;
-      box-shadow: 0 0 20px rgba(239, 83, 80, 0.5);
-    }
-
-    /* Right Column - Status & Meetings */
-    .right-column {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-      padding-top: 20px;
-    }
-
-    .section-card {
-      background: rgba(255, 255, 255, 0.08);
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      border-radius: 15px;
-      padding: 25px;
-    }
-
-    .section-title {
-      font-size: 0.9rem;
-      color: #8899aa;
-      margin-bottom: 15px;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      font-weight: 500;
-    }
-
-    .appointment {
-      background: rgba(255, 255, 255, 0.06);
-      padding: 15px 20px;
-      margin: 10px 0;
-      border-radius: 10px;
-      font-size: 1rem;
-      color: #d4dce6;
-      border-left: 4px solid #3a5a7f;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .appointment-time {
+    .schedule-header {
+      font-size: 1.2rem;
       font-weight: 600;
-      color: #7fa3c9;
-      white-space: nowrap;
+      color: #64748b;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
     }
 
-    .appointment-title {
-      flex: 1;
-      margin-left: 15px;
-      font-weight: 400;
+    .timeline {
+      position: relative;
     }
 
-    .no-meetings {
-      color: #8899aa;
-      font-style: italic;
-      text-align: center;
-      padding: 15px;
-    }
-
-    /* Weather */
-    .weather-content {
+    .time-slot {
       display: flex;
-      align-items: center;
-      gap: 30px;
+      align-items: flex-start;
+      min-height: 70px;
+      position: relative;
+      padding-left: 100px;
     }
 
-    .current-weather {
-      display: flex;
-      align-items: center;
-      gap: 15px;
+    .time-label {
+      position: absolute;
+      left: 0;
+      font-size: 1rem;
+      color: #94a3b8;
+      font-weight: 500;
+      width: 80px;
     }
 
-    .temp {
-      font-size: 2.5rem;
-      font-weight: 300;
+    .event-block {
+      background: #3b82f6;
+      color: white;
+      padding: 15px 20px;
+      border-radius: 8px;
+      width: 100%;
+      margin-bottom: 10px;
+      box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
     }
 
-    #conditions {
-      font-size: 2rem;
-    }
-
-    .forecast {
-      display: flex;
-      gap: 20px;
-      flex: 1;
-      justify-content: center;
-    }
-
-    .forecast > div {
-      text-align: center;
-    }
-
-    .forecast-day-name {
+    .event-title {
+      font-size: 1.1rem;
       font-weight: 500;
       margin-bottom: 5px;
-      color: #8899aa;
-      font-size: 0.85rem;
     }
 
-    .forecast-icon {
-      font-size: 1.8rem;
-      margin: 5px 0;
-    }
-
-    .forecast-temps {
+    .event-time {
       font-size: 0.9rem;
-      color: #b8c5d6;
+      opacity: 0.9;
+    }
+
+    .no-events {
+      color: #94a3b8;
+      font-style: italic;
+      padding: 20px 0;
+      padding-left: 100px;
+    }
+
+    .empty-slot {
+      height: 70px;
     }
   </style>
 </head>
 <body>
 
-  <header>
-    <h1>Centennial – South Conference Room</h1>
-    <img id="logo" src="https://wg.scene7.com/is/image/wrenchgroup/updated-2023-logo-pl23wi001wg?fmt=png-alpha" alt="Plumbline Logo">
-  </header>
+  <div class="container">
+    <!-- Left Panel -->
+    <div class="left-panel">
+      <div class="logo-section">
+        <img id="logo" src="https://wg.scene7.com/is/image/wrenchgroup/updated-2023-logo-pl23wi001wg?fmt=png-alpha" alt="Plumbline Logo">
+      </div>
 
-  <div class="main-grid">
-    <!-- Left: Clock & Weather -->
-    <div class="left-column">
-      <div class="clock" id="clock">--:--</div>
-      <div class="date" id="date">Loading...</div>
-      
-      <!-- Weather -->
-      <div class="section-card" style="margin-top: 40px;">
-        <div class="section-title">Weather</div>
-        <div class="weather-content">
-          <div class="current-weather">
-            <div class="temp" id="temp">--°F</div>
-            <div id="conditions"></div>
-          </div>
-          <div class="forecast" id="forecast"></div>
+      <div class="main-content">
+        <div class="room-name">Conference Room</div>
+        <div class="status-message available" id="status-message">
+          Free for 3 hours, 21 minutes
         </div>
+      </div>
+
+      <div class="clock-section">
+        <div class="clock" id="clock">10:09 AM</div>
+        <div class="date" id="date">Friday, November 1, 2025</div>
       </div>
     </div>
 
-    <!-- Right: Status & Meetings -->
-    <div class="right-column">
-      <!-- Availability Status -->
-      <div class="status-display">
-        <div id="status">
-          <span class="status-icon available" id="status-icon"></span>
-          <span id="status-text">Loading schedule...</span>
-        </div>
-      </div>
-
-      <!-- Upcoming Meetings -->
-      <div class="section-card">
-        <div class="section-title">Today's Schedule</div>
-        <div id="upcoming"></div>
+    <!-- Right Panel - Timeline Schedule -->
+    <div class="right-panel">
+      <div class="schedule-header">Today's Schedule</div>
+      <div class="timeline" id="timeline">
+        <!-- Schedule will be populated here -->
       </div>
     </div>
   </div>
@@ -272,54 +201,16 @@
       "https://outlook.office365.com/owa/calendar/73ff77286546455d984e75751c99096d@plumblineservices.com/e8f33aaadcfb49e5b0a03df0bdb5e2c58129590484901015770/calendar.ics"
     );
 
-    const LAT = 39.5807, LON = -104.8772;
-
     // Clock
     function updateClock() {
       const now = new Date();
       document.getElementById("clock").textContent =
-        now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+        now.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
       document.getElementById("date").textContent =
         now.toLocaleDateString([], { weekday: "long", month: "long", day: "numeric", year: "numeric" });
     }
     setInterval(updateClock, 1000);
     updateClock();
-
-    // Weather
-    async function loadWeather() {
-      try {
-        const url = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&temperature_unit=fahrenheit&current=temperature_2m,weathercode&daily=temperature_2m_max,temperature_2m_min,weathercode&forecast_days=4&timezone=auto`;
-        const res = await fetch(url);
-        const data = await res.json();
-        const codes = { 0:"☀️", 1:"🌤", 2:"⛅", 3:"☁️", 45:"🌫", 48:"🌫", 51:"🌦", 61:"🌧", 71:"❄️", 80:"🌧", 95:"⛈" };
-
-        document.getElementById("temp").textContent = Math.round(data.current.temperature_2m) + "°F";
-        document.getElementById("conditions").textContent = codes[data.current.weathercode] || "";
-
-        const fc = document.getElementById("forecast");
-        fc.innerHTML = "";
-        for (let i = 1; i <= 3 && i < data.daily.time.length; i++) {
-          const d = new Date(data.daily.time[i]);
-          const dayName = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][d.getDay()];
-          const icon = codes[data.daily.weathercode[i]] || "";
-          const high = Math.round(data.daily.temperature_2m_max[i]);
-          const low = Math.round(data.daily.temperature_2m_min[i]);
-          
-          fc.innerHTML += `
-            <div>
-              <div class="forecast-day-name">${dayName}</div>
-              <div class="forecast-icon">${icon}</div>
-              <div class="forecast-temps">${high}°/${low}°</div>
-            </div>
-          `;
-        }
-      } catch (e) {
-        console.log("Weather error", e);
-      }
-    }
-
-    loadWeather();
-    setInterval(loadWeather, 1800000);
 
     // ICS calendar status
     async function loadICS() {
@@ -338,9 +229,9 @@
           else if (line.startsWith("END:VEVENT")) events.push(current);
         }
 
-        updateStatus(events);
+        updateDisplay(events);
       } catch (e) {
-        document.getElementById("status-text").textContent = "Unable to load schedule";
+        document.getElementById("status-message").textContent = "Unable to load schedule";
         console.error("ICS error", e);
       }
     }
@@ -360,44 +251,103 @@
       return new Date(iso);
     }
 
-    function updateStatus(events) {
+    function updateDisplay(events) {
       const now = new Date();
       const todayEvents = events.filter(e => e.start && e.start.toDateString() === now.toDateString());
       const ongoing = todayEvents.find(e => now >= e.start && now < e.end);
-      const statusEl = document.getElementById("status");
-      const statusText = document.getElementById("status-text");
-      const statusIcon = document.getElementById("status-icon");
       
+      // Update status message
+      const statusEl = document.getElementById("status-message");
       if (ongoing) {
-        statusText.textContent = "In Use – " + (ongoing.summary || "Meeting") + " until " + formatTime(ongoing.end);
-        statusEl.className = "busy";
-        statusIcon.className = "status-icon busy";
+        const minutesLeft = Math.floor((ongoing.end - now) / 60000);
+        const hoursLeft = Math.floor(minutesLeft / 60);
+        const minsLeft = minutesLeft % 60;
+        
+        let timeText = "";
+        if (hoursLeft > 0) {
+          timeText = `${hoursLeft} hour${hoursLeft > 1 ? 's' : ''}, ${minsLeft} minute${minsLeft !== 1 ? 's' : ''}`;
+        } else {
+          timeText = `${minsLeft} minute${minsLeft !== 1 ? 's' : ''}`;
+        }
+        
+        statusEl.textContent = `In use for ${timeText}`;
+        statusEl.className = "status-message busy";
       } else {
         const next = todayEvents.find(e => e.start > now);
-        statusText.textContent = next ? "Available until " + formatTime(next.start) : "Available all day";
-        statusEl.className = "available";
-        statusIcon.className = "status-icon available";
+        if (next) {
+          const minutesUntil = Math.floor((next.start - now) / 60000);
+          const hoursUntil = Math.floor(minutesUntil / 60);
+          const minsUntil = minutesUntil % 60;
+          
+          let timeText = "";
+          if (hoursUntil > 0) {
+            timeText = `${hoursUntil} hour${hoursUntil > 1 ? 's' : ''}, ${minsUntil} minute${minsUntil !== 1 ? 's' : ''}`;
+          } else {
+            timeText = `${minsUntil} minute${minsUntil !== 1 ? 's' : ''}`;
+          }
+          
+          statusEl.textContent = `Free for ${timeText}`;
+        } else {
+          statusEl.textContent = "Free all day";
+        }
+        statusEl.className = "status-message available";
       }
       
-      // Show upcoming appointments
-      const upcomingEl = document.getElementById("upcoming");
-      const futureEvents = todayEvents.filter(e => e.start > now).slice(0, 5);
+      // Build timeline
+      buildTimeline(todayEvents);
+    }
+
+    function buildTimeline(events) {
+      const timeline = document.getElementById("timeline");
+      timeline.innerHTML = "";
       
-      if (futureEvents.length > 0) {
-        let html = '';
-        futureEvents.forEach(event => {
-          html += `
-            <div class="appointment">
-              <span class="appointment-time">${formatTime(event.start)} - ${formatTime(event.end)}</span>
-              <span class="appointment-title">${event.summary || "Meeting"}</span>
-            </div>
-          `;
-        });
-        upcomingEl.innerHTML = html;
-      } else if (!ongoing) {
-        upcomingEl.innerHTML = '<div class="no-meetings">No meetings scheduled for today</div>';
-      } else {
-        upcomingEl.innerHTML = '<div class="no-meetings">No more meetings today</div>';
+      if (events.length === 0) {
+        timeline.innerHTML = '<div class="no-events">No meetings scheduled today</div>';
+        return;
+      }
+      
+      // Sort events by start time
+      events.sort((a, b) => a.start - b.start);
+      
+      // Generate hourly slots from 8am to 6pm
+      const startHour = 8;
+      const endHour = 18;
+      
+      for (let hour = startHour; hour <= endHour; hour++) {
+        const timeSlot = document.createElement("div");
+        timeSlot.className = "time-slot";
+        
+        const timeLabel = document.createElement("div");
+        timeLabel.className = "time-label";
+        const ampm = hour >= 12 ? "pm" : "am";
+        const displayHour = hour > 12 ? hour - 12 : hour;
+        timeLabel.textContent = `${displayHour}:00${ampm}`;
+        
+        timeSlot.appendChild(timeLabel);
+        
+        // Find events that start in this hour
+        const hourEvents = events.filter(e => e.start.getHours() === hour);
+        
+        if (hourEvents.length > 0) {
+          hourEvents.forEach(event => {
+            const eventBlock = document.createElement("div");
+            eventBlock.className = "event-block";
+            
+            const title = document.createElement("div");
+            title.className = "event-title";
+            title.textContent = event.summary || "Meeting";
+            
+            const time = document.createElement("div");
+            time.className = "event-time";
+            time.textContent = `${formatTime(event.start)} - ${formatTime(event.end)}`;
+            
+            eventBlock.appendChild(title);
+            eventBlock.appendChild(time);
+            timeSlot.appendChild(eventBlock);
+          });
+        }
+        
+        timeline.appendChild(timeSlot);
       }
     }
 
