@@ -237,13 +237,32 @@
           } else if (line.startsWith("RRULE:")) {
             current.rrule = line.slice(6).trim();
             console.log("Found recurring event:", current.summary, "RRULE:", current.rrule);
+          } else if (line.startsWith("STATUS:")) {
+            current.status = line.slice(7).trim();
+            console.log("Event status:", current.summary, "STATUS:", current.status);
+          } else if (line.includes("PARTSTAT=")) {
+            const match = line.match(/PARTSTAT=([^;:\s]+)/);
+            if (match) {
+              current.partstat = match[1];
+              console.log("Participant status:", current.summary, "PARTSTAT:", current.partstat);
+            }
           } else if (line.startsWith("END:VEVENT")) {
-            // If it's a recurring event, expand it for today
-            if (current.rrule && current.start) {
-              console.log("Expanding recurring event:", current.summary);
-              expandRecurringEvent(current, events);
-            } else {
-              events.push(current);
+            // Only include events that are confirmed/accepted or don't have a status
+            // Skip tentative, declined, or needs-action events
+            const shouldInclude = !current.partstat || 
+                                 current.partstat === "ACCEPTED" || 
+                                 (!current.status || current.status === "CONFIRMED");
+            
+            console.log("Event:", current.summary, "Include?", shouldInclude, "Status:", current.status, "PartStat:", current.partstat);
+            
+            if (shouldInclude) {
+              // If it's a recurring event, expand it for today
+              if (current.rrule && current.start) {
+                console.log("Expanding recurring event:", current.summary);
+                expandRecurringEvent(current, events);
+              } else {
+                events.push(current);
+              }
             }
           }
         }
