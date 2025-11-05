@@ -247,13 +247,23 @@
               console.log("Participant status:", current.summary, "PARTSTAT:", current.partstat);
             }
           } else if (line.startsWith("END:VEVENT")) {
+            // Log full event details for debugging
+            console.log("=== FULL EVENT ===");
+            console.log("Summary:", current.summary);
+            console.log("Start:", current.start);
+            console.log("End:", current.end);
+            console.log("Status:", current.status);
+            console.log("PartStat:", current.partstat);
+            console.log("RRULE:", current.rrule);
+            
             // Only include events that are confirmed/accepted or don't have a status
             // Skip tentative, declined, or needs-action events
             const shouldInclude = !current.partstat || 
                                  current.partstat === "ACCEPTED" || 
                                  (!current.status || current.status === "CONFIRMED");
             
-            console.log("Event:", current.summary, "Include?", shouldInclude, "Status:", current.status, "PartStat:", current.partstat);
+            console.log("Should include?", shouldInclude);
+            console.log("==================");
             
             if (shouldInclude) {
               // If it's a recurring event, expand it for today
