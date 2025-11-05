@@ -218,6 +218,7 @@
       try {
         const res = await fetch(ICS_URL);
         const text = await res.text();
+        console.log("========== ICS FETCH COMPLETE ==========");
         console.log("ICS data received, length:", text.length);
         
         const unfolded = text.replace(/\r?\n[ \t]/g, "");
@@ -236,25 +237,25 @@
             current.end = parseDate(line);
           } else if (line.startsWith("RRULE:")) {
             current.rrule = line.slice(6).trim();
-            console.log("Found recurring event:", current.summary, "RRULE:", current.rrule);
+            console.log(">>>>>> FOUND RECURRING EVENT:", current.summary);
+            console.log(">>>>>> RRULE:", current.rrule);
           } else if (line.startsWith("STATUS:")) {
             current.status = line.slice(7).trim();
-            console.log("Event status:", current.summary, "STATUS:", current.status);
           } else if (line.includes("PARTSTAT=")) {
             const match = line.match(/PARTSTAT=([^;:\s]+)/);
             if (match) {
               current.partstat = match[1];
-              console.log("Participant status:", current.summary, "PARTSTAT:", current.partstat);
             }
           } else if (line.startsWith("END:VEVENT")) {
             // Log full event details for debugging
-            console.log("=== FULL EVENT ===");
+            console.log("========== FULL EVENT DETAILS ==========");
             console.log("Summary:", current.summary);
             console.log("Start:", current.start);
             console.log("End:", current.end);
             console.log("Status:", current.status);
             console.log("PartStat:", current.partstat);
             console.log("RRULE:", current.rrule);
+            console.log("Is Recurring?", !!current.rrule);
             
             // Only include events that are confirmed/accepted or don't have a status
             // Skip tentative, declined, or needs-action events
@@ -263,12 +264,12 @@
                                  (!current.status || current.status === "CONFIRMED");
             
             console.log("Should include?", shouldInclude);
-            console.log("==================");
+            console.log("========================================");
             
             if (shouldInclude) {
               // If it's a recurring event, expand it for today
               if (current.rrule && current.start) {
-                console.log("Expanding recurring event:", current.summary);
+                console.log("!!!!! EXPANDING RECURRING EVENT:", current.summary);
                 expandRecurringEvent(current, events);
               } else {
                 events.push(current);
@@ -277,12 +278,13 @@
           }
         }
 
+        console.log("========== PARSING COMPLETE ==========");
         console.log("Total events parsed:", events.length);
         console.log("Events:", events);
         updateDisplay(events);
       } catch (e) {
         document.getElementById("status-message").textContent = "Unable to load schedule";
-        console.error("ICS error", e);
+        console.error("ICS error:", e);
       }
     }
 
@@ -305,14 +307,20 @@
       const now = new Date();
       const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       
+      console.log(">>>>> Checking if recurring event applies to today");
+      console.log(">>>>> Event day of week:", event.start.getDay());
+      console.log(">>>>> Today day of week:", today.getDay());
+      
       // Check if the original event is today
       if (event.start.toDateString() === today.toDateString()) {
+        console.log(">>>>> Original event IS today, adding it");
         events.push(event);
         return;
       }
       
       // Parse RRULE to check if event occurs today
       if (event.rrule.includes("FREQ=DAILY")) {
+        console.log(">>>>> Daily recurrence - adding for today");
         // Daily recurrence - create instance for today
         const duration = event.end - event.start;
         const todayStart = new Date(today);
@@ -330,12 +338,16 @@
         const eventDay = event.start.getDay();
         const todayDay = today.getDay();
         
+        console.log(">>>>> Weekly recurrence - matching days?", eventDay === todayDay);
+        
         if (eventDay === todayDay) {
           const duration = event.end - event.start;
           const todayStart = new Date(today);
           todayStart.setHours(event.start.getHours(), event.start.getMinutes(), 0, 0);
           
           const todayEnd = new Date(todayStart.getTime() + duration);
+          
+          console.log(">>>>> Adding weekly recurring event for today");
           
           events.push({
             summary: event.summary,
