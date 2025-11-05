@@ -311,6 +311,26 @@
       console.log(">>>>> Event day of week:", event.start.getDay());
       console.log(">>>>> Today day of week:", today.getDay());
       
+      // Check if there's an UNTIL date in the RRULE
+      if (event.rrule && event.rrule.includes("UNTIL=")) {
+        const untilMatch = event.rrule.match(/UNTIL=(\d{8}T\d{6}Z)/);
+        if (untilMatch) {
+          const untilStr = untilMatch[1];
+          const untilYear = untilStr.substr(0, 4);
+          const untilMon = untilStr.substr(4, 2);
+          const untilDay = untilStr.substr(6, 2);
+          const untilDate = new Date(`${untilYear}-${untilMon}-${untilDay}`);
+          
+          console.log(">>>>> Recurring event has UNTIL date:", untilDate);
+          console.log(">>>>> Today:", today);
+          
+          if (today > untilDate) {
+            console.log(">>>>> Event recurrence has ENDED - skipping");
+            return;
+          }
+        }
+      }
+      
       // Check if the original event is today
       if (event.start.toDateString() === today.toDateString()) {
         console.log(">>>>> Original event IS today, adding it");
