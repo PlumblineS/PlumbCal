@@ -44,7 +44,7 @@
     }
 
     #logo {
-      max-width: 200px;
+      max-width: 250px;
       height: auto;
     }
 
@@ -160,10 +160,6 @@
       padding: 20px 0;
       padding-left: 100px;
     }
-
-    .empty-slot {
-      height: 70px;
-    }
   </style>
 </head>
 <body>
@@ -218,8 +214,6 @@
       try {
         const res = await fetch(ICS_URL);
         const text = await res.text();
-        console.log("========== ICS FETCH COMPLETE ==========");
-        console.log("ICS data received, length:", text.length);
         
         const unfolded = text.replace(/\r?\n[ \t]/g, "");
         const lines = unfolded.split(/\r?\n/);
@@ -237,8 +231,6 @@
             current.end = parseDate(line);
           } else if (line.startsWith("RRULE:")) {
             current.rrule = line.slice(6).trim();
-            console.log(">>>>>> FOUND RECURRING EVENT:", current.summary);
-            console.log(">>>>>> RRULE:", current.rrule);
           } else if (line.startsWith("STATUS:")) {
             current.status = line.slice(7).trim();
           } else if (line.includes("PARTSTAT=")) {
@@ -247,29 +239,12 @@
               current.partstat = match[1];
             }
           } else if (line.startsWith("END:VEVENT")) {
-            // Log full event details for debugging
-            console.log("========== FULL EVENT DETAILS ==========");
-            console.log("Summary:", current.summary);
-            console.log("Start:", current.start);
-            console.log("End:", current.end);
-            console.log("Status:", current.status);
-            console.log("PartStat:", current.partstat);
-            console.log("RRULE:", current.rrule);
-            console.log("Is Recurring?", !!current.rrule);
-            
-            // Only include events that are confirmed/accepted or don't have a status
-            // Skip tentative, declined, or needs-action events
             const shouldInclude = !current.partstat || 
                                  current.partstat === "ACCEPTED" || 
                                  (!current.status || current.status === "CONFIRMED");
             
-            console.log("Should include?", shouldInclude);
-            console.log("========================================");
-            
             if (shouldInclude) {
-              // If it's a recurring event, expand it for today
               if (current.rrule && current.start) {
-                console.log("!!!!! EXPANDING RECURRING EVENT:", current.summary);
                 expandRecurringEvent(current, events);
               } else {
                 events.push(current);
@@ -278,9 +253,6 @@
           }
         }
 
-        console.log("========== PARSING COMPLETE ==========");
-        console.log("Total events parsed:", events.length);
-        console.log("Events:", events);
         updateDisplay(events);
       } catch (e) {
         document.getElementById("status-message").textContent = "Unable to load schedule";
@@ -307,10 +279,6 @@
       const now = new Date();
       const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       
-      console.log(">>>>> Checking if recurring event applies to today");
-      console.log(">>>>> Event day of week:", event.start.getDay());
-      console.log(">>>>> Today day of week:", today.getDay());
-      
       // Check if there's an UNTIL date in the RRULE
       if (event.rrule && event.rrule.includes("UNTIL=")) {
         const untilMatch = event.rrule.match(/UNTIL=(\d{8}T\d{6}Z)/);
@@ -321,27 +289,18 @@
           const untilDay = untilStr.substr(6, 2);
           const untilDate = new Date(`${untilYear}-${untilMon}-${untilDay}`);
           
-          console.log(">>>>> Recurring event has UNTIL date:", untilDate);
-          console.log(">>>>> Today:", today);
-          
           if (today > untilDate) {
-            console.log(">>>>> Event recurrence has ENDED - skipping");
             return;
           }
         }
       }
       
-      // Check if the original event is today
       if (event.start.toDateString() === today.toDateString()) {
-        console.log(">>>>> Original event IS today, adding it");
         events.push(event);
         return;
       }
       
-      // Parse RRULE to check if event occurs today
       if (event.rrule.includes("FREQ=DAILY")) {
-        console.log(">>>>> Daily recurrence - adding for today");
-        // Daily recurrence - create instance for today
         const duration = event.end - event.start;
         const todayStart = new Date(today);
         todayStart.setHours(event.start.getHours(), event.start.getMinutes(), 0, 0);
@@ -354,11 +313,8 @@
           end: todayEnd
         });
       } else if (event.rrule.includes("FREQ=WEEKLY")) {
-        // Weekly recurrence - check if today matches the day of week
         const eventDay = event.start.getDay();
         const todayDay = today.getDay();
-        
-        console.log(">>>>> Weekly recurrence - matching days?", eventDay === todayDay);
         
         if (eventDay === todayDay) {
           const duration = event.end - event.start;
@@ -367,8 +323,6 @@
           
           const todayEnd = new Date(todayStart.getTime() + duration);
           
-          console.log(">>>>> Adding weekly recurring event for today");
-          
           events.push({
             summary: event.summary,
             start: todayStart,
@@ -376,7 +330,6 @@
           });
         }
       }
-      // Add more recurrence patterns as needed
     }
 
     function updateDisplay(events) {
@@ -384,7 +337,6 @@
       const todayEvents = events.filter(e => e.start && e.start.toDateString() === now.toDateString());
       const ongoing = todayEvents.find(e => now >= e.start && now < e.end);
       
-      // Update status message
       const statusEl = document.getElementById("status-message");
       if (ongoing) {
         const minutesLeft = Math.floor((ongoing.end - now) / 60000);
@@ -421,7 +373,6 @@
         statusEl.className = "status-message available";
       }
       
-      // Build timeline
       buildTimeline(todayEvents);
     }
 
@@ -434,10 +385,8 @@
         return;
       }
       
-      // Sort events by start time
       events.sort((a, b) => a.start - b.start);
       
-      // Generate hourly slots from 6am to 6pm
       const startHour = 6;
       const endHour = 18;
       
@@ -453,7 +402,6 @@
         
         timeSlot.appendChild(timeLabel);
         
-        // Find events that start in this hour
         const hourEvents = events.filter(e => e.start.getHours() === hour);
         
         if (hourEvents.length > 0) {
